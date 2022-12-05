@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script type="text/javascript">
+        // 1、原型
+        /*
+    原型prototype是function的一个对象属性，它其中包括构造器constructor，和父原型prototype.
+prototype是构造函数实例化出来的所有实例对象的公共祖先，所有实例对象都继承了原型上的属性和方法。
+    每个构造函数都有自己的原型prototype，原型上还有它的父原型，由此形成原型链。实例对象调用属性的步骤是
+先在构造函数自身的属性中找，找不到再去原型prototype，然后一直顺着原型链找属性，直至Object.prototype。
+    构造函数中的属性的值如果是固定的，那么每次实例化new的时候，都会把这些值添加到this对象中，造成代码冗余。
+为了解决这种冗余，我们一般将具有固定值的属性写在prototype中，需要参数传值的才写在this对象中。
+每次实例化的时候，实例对象都会继承prototype上的属性。 同理，所有的方法都要写在原型上面。
+    实例对象无法增加/删除/更改prototype中的属性，它只能增加/删除/更改的是构造函数中的属性。
+    原型是对象，因此在给原型prototype添加属性和方法时，一般都是以对象的形式添加。
+    打印实例对象，会显示this对象中的属性，而prototype上的属性和方法在prototype对象中。    
+        */
+        //    function Telephone() {}
+           function Handphone(color, brand) {
+            console.log(this)  //打印属性方法齐全的实例对象，
+            this.color = color;
+            this.brand = brand;
+           }
+
+           Handphone.prototype = {
+              rom: '64G',
+              ram: '6G',
+              screen: '18:9',
+              system: 'Android',
+              call: function() {
+                 console.log(`I am calling somebody`)
+              }
+           }
+
+
+           let hp1 = new Handphone('red', '小米')
+           let hp2 = new Handphone('black', '华为')
+           console.log(hp1.rom);
+           console.log(hp2.ram);
+           console.log(hp1.screen)
+           console.log(hp2.screen)
+           hp2.call()
+           console.log(hp1)
+           console.log(hp1.constructor)
+           console.log(Handphone.prototype)  //构造器constructor -> 构造函数本身
+
+// 2、构造函数的this中的proto属性
+/*
+    实例化构造函数以后，自动生成this对象。this对象中默认有__proto__，它的默认值是构造函数的原型。
+因此，原型一定是属于实例对象的，而非属于构造函数。__proto__也属于实例对象，而不属于构造函数。
+__proto__是prototype的键名，这样系统内部就可以通过__proto__来访问原型prototype。
+    用户使用prototype，本来需要this.__proto__.prototype。可javascript认为__proto__是系统内部键名，
+所以用户使用prototype只需要this.prototype即可。
+    实例对象查询属性是先在自身this对象中找相应的属性。如果没有，就通过__proto__找到原型，然后在原型中
+寻找相应的属性。
+    原型链的顶端是Object.prototype
+    用户不能自己设置__proto__，系统会报错。而且，__proto是系统的属性，用户只能更改，不能自造，自造没效果。
+        */
+           function Car() {
+            //    let this = {
+            //     __proto__: Car.prototype 
+            //    }
+           }
+
+           Car.prototype.name = 'Benz';
+           let car = new Car();
+           console.log(car)
+           console.log(car.name)
+
+// 3、构造器constructor
+/*
+    构造器constructor存在于prototype中，constructor默认指向构造函数本身，当然也可以修改构造器的指向。
+实例化构造函数就是将原型中的构造器给实例化。
+构造器存储着构造函数的原型中为被实例化的属性和方法。实例化构造函数时，构造器中的内容就会变成原型上的内容。
+    也就是说，constructor保存的是实例化之前的东西。实例化之后。
+    Car.prototype.constructor -> Car() -> prototype -> name:apple
+    在没有构造函数没有实例化之前，构造函数.prototype.constructor指向的就是构造函数本身。
+构造函数的prototype中有name属性。当构造函数实例化的时候，就是将构造器的属性拿到实例对象中的prototype中。
+        */
+
+        function Telephone() {
+            this.name = '张三';
+        }
+        console.log(Telephone.prototype)
+
+           Food.prototype.name = 'banana';
+           function Food() {}
+           let food = new Food()
+           Food.prototype = {
+               name: 'apple'
+           }
+           let food2 = new Food()
+           console.log('food1',food)
+           console.log('food2',food2)
+
+// 把构造函数Food的原型prototype中的constructor指向构造函数Telephone，原本默认指向构造函数Handphone
+        Food.prototype = {
+            constructor: Telephone
+        }
+
+        let food3 = new Food()
+        console.log('food3',food3)
+
+//原则上原型只能增删改自己的属性，子原型无法改父原型中的属性。实际上可以修改，但是不推荐。
+        Professor.prototype.tSkill = 'JAVA';
+        function Professor() {}
+        let professor = new Professor();
+
+        Teacher.prototype = professor;
+        function Teacher() {
+            this.mSkill = 'JS/JQ',
+            this.success = {
+                alibaba: '28',
+                tencent: '30'
+            },
+            this.students = 500
+        }
+        let teacher = new Teacher();
+
+        Student.prototype = teacher;
+        function Student() {
+            this.pSkill = 'HTML/CSS';
+        }
+        let student = new Student();
+        student.success.baidu = '100'   
+        student.success.alibaba = '29' 
+        student.students = 400 
+        student.students++;  
+        // student.students = student.students + 1;  student.students能够访问到500，并加1。赋值语句给student对象添加students属性，然后赋值501
+        console.log(teacher, student)  //teacher 500 student 401 
+
+        // 案例
+        function CarA() {
+            this.brand = 'Benz';
+        }
+
+        CarA.prototype = {
+            brand: 'Mazda',
+            intro: function () {
+                console.log(`我是${this.brand}车`)
+            }
+        }
+
+        let cara = new CarA()
+        // this指向car实例对象，构造函数中有brand，所以用构造函数自身的brand。
+        cara.intro()   //我是Benz车
+        CarA.prototype.intro()  //我是Mazda车
+
+
+
+//4、创建对象的方法
+/*
+    使用{}创建：let obj1 = {}。
+    实例化Object()：new Object()  两种创建方式完全相等。
+    如果对象是通过构造函数构造出来的，则constructor指向构造函数。如果对象是普通的对象，则constructor
+指向Object()。
+    new的作用：1、根据构造函数生成实例对象。2、根据构造函数的原型生成实例对象的原型。
+    原型的原型是由系统自带的Object构造出来的。
+    Object.create(params)：用户自定义原型，然后实例化出实例对象。
+*/  
+        let some = {
+            num: 2
+        }
+
+        function Obj() { }
+        Obj.prototype.num = 1;
+        let obj1 = Object.create(some)  //把some作为obj1的原型。
+        let obj2 = new Obj();
+        console.log(obj1);
+        console.log(obj2);
+
+        // 使用null作为参数，实例对象没有原型。这就证明不是所有的对象都继承于Object.prototype
+        let obj3 = Object.create(null)
+        console.log(obj3)
+        obj3.num = 1;  //给对象添加属性
+        let obj4 = Object.create(obj3)  //然后将对象作为obj4的原型来实例化
+        console.log(obj4)
+ 
+
+// 5、原型上的toString()
+/* Number和Object的原型都有toString，但原型进行了方法的重写，所以实现的功能不同。
+原型上的toString()主要是用于判断数据的类型。
+undefined null 没有toString()，因为undefined和null不能经过包装类。它们也没有原型
+*/
+        console.log(Object.prototype.toString.call(1)) //[object Number]
+        console.log(Object.prototype.toString.call('a'))  //[object String]
+        console.log(Object.prototype.toString.call(true)) //[object Boolean]
+        console.log(Object.prototype.toString.call([12, 23])) //[object Array]
+        console.log(Object.prototype.toString.call({}))  //[object Object]
+        console.log(Number.prototype.toString.call(1))  //'1'
+        // console.log(undefined.toString())  //报错
+
+
+        // // 原始值可以经过包装类
+        // num.toString();
+        // // new Number(1) -> toString()
+        // // num2对象有自己的构造器和toString()方法。
+        // let num2 = new Number(num)
+        // function test() {
+        //     console.log('a')
+        // }
+        // test()
+        // // test.call()
+
+
+// 6、call、apply
+/*
+    Friuts.call(newFriut, params)：将this的指向改为newFriut，params是Fruits执行所需的参数。
+    apply(newFruit，[parmas])：apply的逻辑和call相同，只是参数用数组装载。
+*/ 
+        function Friuts(name, color) {
+            this.brand = name;
+            this.color = color;
+            this.run = function () {
+                console.log(`running`)
+            }
+        }
+
+        let newFriut = {
+            displacement: '3.0'
+        };
+
+    /*
+    构造函数直接执行相当于是普通函数执行，因此this指向window。可是call将this的指向改为newFriut对象，
+    因此执行构造函数的时候，相当于是给newFriut对象添加属性。最后函数返回newFruit对象。
+    */    
+        console.log(Friuts('orange','yellow')) //undefined，构造函数没有显示的返回值
+        Friuts.call(newFriut, 'apple', 'red');
+        Friuts.apply(newFriut, ['apple', 'red'])  
+        console.log(newFriut)
+
+        let friut = new Friuts('orange', 'red')
+        console.log(friut)
+
+
+
+// 7、原型链继承
+/*
+    将构造函数A的实例对象a赋给构造函数B的原型。相当于是在栈空间开辟一个空间名为构造函数B原型的空间，
+里面存储实例对象a的指针。原来的构造函数原型空间就被销毁了。因此当构造函数B的实例对象想访问构造函数B
+的原型时，相当于是访问实例对象a。由此实现了继承。
+通过将构造函数的实例对象赋给
+*/ 
+        ProfessorA.prototype = {
+            name: 'Mr. Zhang',
+            toSkill: 'JAVA'
+        }
+        function ProfessorA(){}
+        let professora = new ProfessorA()
+
+        TeacherB.prototype = professora
+        function TeacherB(){
+           this.name = 'Mr. Wang';
+           this.mSkill = 'JS/JQ';
+        }
+        let teacherb = new TeacherB()
+
+        StudentC.prototype = teacherb
+        function StudentC(){
+            this.name =  'Mr. Li',
+            this.toSkill =  'HTML/CSS'
+        }
+        let studentc = new StudentC()
+
+        console.log(studentc)
+
+        //通过apply改变this指向，从而借用其他函数的属性和方法，但它没办法借用其他函数的原型。
+        Father.prototype.wife = 'Ms. Liu';
+        function Father(name, mSkill) {
+            this.name = name;
+            this.mSkill = mSkill;
+        }
+        function Child(name, mSkill, age, major) {
+            Father.apply(this, [name, mSkill]);
+            this.age = age;
+            this.major = major; 
+        }
+
+        let child = new Child('Mr. Zhang', 'JS/JQ', 18, 'Computer')
+        console.log('child',child)
+
+        /*
+         公共原型。公共原型的问题是父原型直接赋值给子原型，因此父子原型变量的指针相同，都指向同一个堆内存空间
+         当修改子原型或者父原型时，另一个的值也会跟着变。毕竟它们指向同一个堆内存空间。
+        */
+        function TeacherFun() {
+            this.name = 'Mr. Li';
+            this.tSkill = 'Java';
+        }
+
+        TeacherFun.prototype = {
+            pSkill: 'JS/JQ'
+        }
+
+        let t = new TeacherFun();
+        console.log('teacher', t);
+
+        StudentFun.prototype = {
+            school: 'gunx'
+        }
+        function StudentFun() {
+            this.name = 'Mr. Wang';
+        }
+        // 将teacher的原型赋给Student的原型，这样Student原型就有Teacher原型的属性。
+        StudentFun.prototype = TeacherFun.prototype;
+        StudentFun.prototype.age = 18; //Student原型和Teacher原型上都有age属性
+        let s = new StudentFun()
+
+        console.log('student', s)
+
+        /*继承  圣杯模式
+        圣杯模式就是为了解决公共原型的问题。  原理就是创建一个Buffer空构造函数作为中间件。将父构造函数
+        的原型赋给Buffer的原型，由此实现继承，且有公共原型的问题。然后实例化Buffer构造函数，将实例对象
+        buffer赋给子构造函数的原型。此时子原型为空。
+        子实例对象可以访问子构造函数的原型，即buffer。buffer可以访问Buffer的原型，即父构造函数的原型。
+        由此实现了继承。
+        由于buffer和Buffer原型之间隔着Buffer构造函数，它们值改变不会影响对方。因此解决了公共原型的问题。    
+        */
+        TeacherGrail.prototype = {
+            pSkill: 'JS/JQ'
+        }
+
+        function TeacherGrail() {
+            this.name = 'Mr. Li';
+            this.tSkill = 'Java';
+        }
+        // 因为中间件是空函数，因此子原型必然是空对象。要给子原型添加属性和方法，需要在继承之后添加
+        StudentGrail.prototype = {
+            sSkill: 'HTML'
+        }
+
+        function StudentGrail() {
+            this.name = 'Mr. Wang';
+        }
+        // 封装中间件，即继承功能部分。
+        function inherit(Target, Origin) {
+            function Buffer() {}
+            Buffer.prototype = Origin.prototype;
+            Target.prototype = new Buffer()
+            // 继承后，Target.prototype.constructor = Origin，因此需要变为本身。
+            Target.prototype.constructor = Target
+            Target.prototype.super_class = Origin  //保存继承源，以便找到真正继承的构造函数。
+        }
+
+        inherit(StudentGrail, TeacherGrail)
+
+        let sGrail = new StudentGrail()
+        console.log('sGrail', sGrail)
+
+        // 圣杯模式的闭包  这就是模块化开发，自执行函数有自己的作用域了，防止全局污染。
+        // let inherit = (function () {
+        //     var Buffer = function () { }
+        //     return  function(Target, Origin) {
+        //         Buffer.prototype = Origin.prototype;
+        //         Target.prototype = new Buffer()
+        //         Target.prototype.constructor = Target
+        //         Target.prototype.super_class = Origin  //保存继承源，以便找到真正继承的构造函数。
+        //     }
+        //    // return inherit
+        // })()
+
+
+
+        // 案例：apply
+        function Car(brand, color, displacement) {
+            this.brand = brand;
+            this.color = color;
+            this.displacement = displacement;
+            this.info = function() {
+                return `排量为${this.displacement}的${this.color}${this.brand}`
+            }
+        }
+
+        function Person(opt) {
+            Car.apply(this, [opt.brand, opt.color, opt.displacement]);
+            this.name = opt.name;
+            this.age = opt.age;
+            this.say = function() {
+                console.log(`年龄${this.age}岁，姓名为${this.name}，买了一辆${this.info}`)
+            }
+        }
+
+        let p = new Person({
+            brand: '奔驰',
+            color: '红色',
+            displacement: '3.0',
+            name: '张三',
+            age: 25
+        })
+
+        p.say()
+
+
+// 8、链式调用。对象中this指向对象本身，通过返回this，就相当于是继续调用对象中的方法，因此可以实现链式调用。
+        let sched = {
+            wakeup: function() {
+                console.log('Running');
+                return this;
+            },
+            morning: function() {
+                console.log('Going shopping')
+                return this;
+            },
+            noon: function() {
+                console.log('studying')
+            }
+        }
+
+        sched.wakeup().morning().noon()
+
+
+
+
+/*9、对象枚举
+    枚举：一组有共同特性的数据的集合
+    遍历：一组信息内按顺序一个一个的获取其信息的过程
+*/ 
+
+        let carS = {
+            brand: 'Benz',
+            color: 'red',
+            displacement: '3.0',
+            lang: '5',
+            width: '2.5'
+        }
+
+// 循环属性名
+        for(let key in carS) {
+            console.log(key)
+            //console.log(carS.key)  // undefined   这里的key是字符串
+            //js引擎： carS.key -> carS['key'] ->undefined  carS中没有key属性
+            // 循环属性名
+            console.log(carS[key])    //[]中的key是变量，而不是字符串
+            console.log(key + ':' + carS[key])
+        }
+
+
+//10、hasOwnProperty：只找自身的属性，而不去找原型上的属性。
+        function CarM() {
+            this.brand = 'Benz',
+            this.color = 'red',
+            this.displacement = '3.0'
+        }
+
+        CarM.prototype = {
+            lang: 5,
+            width: 2.5
+        }
+
+        Object.prototype.name = 'Object'
+
+        let carm = new CarM()
+        // 打印自身和原型链上的所有属性
+        for(let key in carm) {
+            console.log(key + ':' + carm[key])
+        }
+
+        // // 只打印自身的属性。
+        for(let key in carm) {
+            if(carm.hasOwnProperty(key)){
+                console.log(key + ':' + carm[key])
+            }
+        } 
+        
+        // 判断属性是否在对象上（自身和原型）。
+        // console.log('lang' in car)
+
+ /*11、instanceof：判断对象是否是该构造函数实例化出来的。
+        A对象的原型里面到底有没有B的原型，如果AB的原型链有重合的地方，那就是true
+        */
+        function CarO() {}
+        let caro = new CarO();
+
+        function Persons(){}
+        let person = new Persons()
+        console.log(caro instanceof CarO)  //true
+        console.log(person instanceof CarO)   //false
+
+        // 判断是不是数组，通过构造函数
+        let a = [];
+        console.log(a.constructor) //Array
+        console.log(a instanceof Array)
+        let str = Object.prototype.toString.call(a)
+        if(str === '[object Array]'){
+            console.log('是数组');
+        }else{
+            console.log('不是数组')
+        }
+        // // 调用call方法，用a替换this。相当于是调用array的toString方法，从而输出[object Array]
+        // Object.prototype = {
+        //     toString: function() {
+        //         this.toString();
+        //     }
+        // }
+
+
+        // this
+        // 普通函数内部的this默认指向window。
+        // function test(b){
+        //     this.d = 3;  //window.d = 3  d = 3
+        //     let a = 1;
+        //     function c() {}
+        // }
+
+        // test(1234)
+
+        // console.log(d)
+        // // 全局范围内的this默认指向window
+        // console.log(this.d)
+
+        // /*
+        // AO = {
+        //     arguments: [1234]
+        //     this: window
+        //     b:1234
+        //     a: undefined
+        //     c: function c() {}
+        // }
+        // */ 
+
+        //因此构造函数的this指向实例对象。 
+        // function Test() {
+        //     /*
+        //         let this = {
+        //             __proto__: Test.prototype
+        //         }
+        //     */ 
+        //    this.name = '123'
+        // }
+
+        // let test = new Test();
+
+        // /*
+        //     AO = {
+        //         this: window -> {
+        //             name: '123',
+        //             __proto__: Test.prototype
+        //         }
+        //     }
+
+        //     GO = {
+        //         Test: function test () {...},
+        //         test: {
+        //              name: '123',
+        //             __proto__: Test.prototype
+        //         }
+        //     }
+        // */ 
+
+        /*
+        callee/caller
+        callee：返回正在被执行的函数对象。callee是实参列表中的一个属性。
+        也就是说，arguments实参列表所对应的函数是谁，callee就返回哪个函数。
+        */ 
+        // function test(a, b, c) {
+        //     console.log(arguments.callee)  //返回正在被执行的函数
+        //     console.log(arguments.callee.length)
+        //     console.log(test.length)  //两者基本相等。
+        //     console.log(arguments.length)
+        // }
+        // test(1, 2)
+
+        // function test1() {
+        //     console.log(arguments.callee)
+        //     function test2() {
+        //         console.log(arguments.callee)
+        //     }
+        //     test2();
+        // }
+        // test1();
+
+
+        //当无法用名字来找函数时，就用arguments.callee来找函数本身。 
+        // var sum = (function(n){
+        //     if(n <= 1){
+        //         return 1
+        //     }
+        //     return n + arguments.callee(n - 1)
+        // })(100)
+
+        // console.log(sum)
+
+        //caller：返回当前被调用函数的函数引用。也就是说，谁调用了test2，它就返回那一个函数。
+        // test1()
+        // function test1() {
+        //     test2();
+        // }
+        // function test2() {
+        //     console.log(test2.caller())
+        // }
+    </script>
+</body>
+
+</html>
