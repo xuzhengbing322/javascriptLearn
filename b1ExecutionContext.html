@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        /*1、执行上下文
+            程序代码执行可按块分为全局代码块、函数代码块和块代码块。每个代码块执行前都会进行预编译，
+即创建各自代码块的执行期上下文。因此，执行期上下文按代码块可分为：1、全局执行上下文，程序预编译时创建。
+2、函数执行上下文，在函数被定义的时候创建。3、块执行上下文。
+            执行上下文对象中包含三个属性：变量对象（GO/AO）、作用域链(scope chain)、this。
+        */
+
+        /*2、变量对象（GO/AO）
+            变量对象用来存储执行上下文中定义的所有变量和函数声明。
+            AO：函数调用时就会创建一个函数执行上下文，其中的活跃对象AO存储着函数的所有变量和函数声明。
+            GO：程序执行的时候会创建一个全局执行上下文，上下文中包含变量对象G0(window)。
+GO存储着所有的全局变量和全局函数声明。
+            ES5中var的变量可以提升，因此预编译的第一步往往是查找var声明的变量。可是在ES6中，let和const
+声明的变量不提升，因此预编译时不查找let和const声明的变量，而是在执行代码的时候遇到let和const声明的变量，
+才将变量写入AO/GO。函数声明具有提升，但是函数表达式不可提升。
+            未声明就赋值的变量是全局变量。全局变量都存储在window全局对象中，window本身就是全局域。
+全局环境中用let和const声明的变量是全局变量，但变量并不是存储在window全局对象中，因此无法通过window.来调用。
+        */
+        //ES5：    
+        function test(a) {
+            console.log('#', a) //# [Function: a]
+            var a = 1;
+            console.log(a) // 1
+            // function a() { }
+            var b = function () { }
+            console.log(b) // [Function: b]
+            function c() { }
+        }
+        test(2)
+        //     this: window
+        //     AO = {
+        //         第一步： 寻找函数里面的形参和变量声明（变量声明的提升）(let定义的变量不提升)
+        //         a: undefined
+        //         b: undefined
+        //         第二步：把实参的值赋给形参
+        //         a: undefined -> 2
+        //         b: undefined
+        //         第三步：寻找函数，函数声明，赋值函数体
+        //         a: undefined -> 2 -> function a4(){}
+        //         b: undefined
+        //         c:function c4(){}
+        //         第四步：执行函数(执行赋值语句、判断语句、return、函数调用)
+        //         a:  undefined -> 2 -> function a4(){} -> 1
+        //         b: function(){}
+        //         c: function c4(){}
+        //     }
+
+        //GO
+        var a1 = 1
+
+        function a1() {
+            console.log(2)
+        }
+        console.log('#', a1) //# 1
+
+        // GO = {
+        //      1、找变量（let定义的变量不提升）
+        //          a1: undefined
+        //      2、找函数声明
+        //          a1: undefined -> function a1(){}
+        //      3、执行（赋值，函数执行）
+        //          a1: undefined -> function a1(){} -> 1 
+        //     }
+
+        // GO和AO
+        function test2() {
+            let a2 = b2 = 1;
+            console.log(b2)
+        }
+
+        test2() //1
+        /*
+          1、创建GO
+          GO = {
+            test2: function test2 (){}
+            b2: 1    //未声明就赋值的变量是全局变量。
+          }
+          2、GO执行代码时遇到函数执行语句test2()，于是创建AO
+          AO = {
+              a6: undefined -> 1
+          }
+        */
+
+        //let会让if和for形成块作用域。因此外部无法访问b8。
+        let a3 = 1
+        function test3() {
+            //console.log('&&&',b3) //b3 is not defined
+            if (a3) {
+                let b3 = 2;
+                console.log('**', b3) //2
+            }
+            //console.log('&&&',b3)  //b3 is not defined
+        }
+        test3();
+
+        // return具有结束函数执行的作用
+        function test4() {
+            return a4;
+            a4 = 1;
+
+            function a4() { }
+            var a4 = 2;
+        }
+        console.log(test4()) //[Function: a4]
+
+
+
+        a5 = 1;
+        function test5(e5) {
+            console.log(e5)  //f e5() {}
+            function e5() { }
+            arguments[0] = 2;
+            console.log('#', e5) //2
+            if (a5) {
+                var b5 = 3
+            }
+            var c5
+            a5 = 4;
+            var a5;
+            console.log(b5) // undefined
+            f5 = 5;
+            console.log(c5) //undefined
+            console.log(a5) //4
+        }
+
+        var a5
+        test5(1)
+
+        /*
+                GO = {
+                    a5: undefined 
+                    test5: function (){}
+                    f5: 5
+                }
+                AO = {
+                    e5: undefined -> 1 -> function e5(){} -> 2 
+                    b5: undefined,
+                    c5: undefined,
+                    a5: undefined -> 4
+        
+                }
+        */
+
+        /*3、作用域
+            function是引用类型数据，它有一些可供访问的属性，如name、length、prototype，还有一些
+不可访问的属性，如[[scope]]：作用域。
+            scope：函数被定义的时候，就会创建函数的作用域scope。作用域是存储作用域链的容器。
+作用域链存储的就是从上到下链式排列的AO/GO。当函数执行完成以后，AO被销毁。如果再次执行函数，则重新生成
+一个新的AO。也就是说，AO是一个即时的存储容器。
+            当全局被执行的时候，首先生成GO，然后进行预编译。预编译的过程中如果发现被定义的函数，则会创建
+函数的作用域。作用域中的作用域链和当前环境的作用域链相同。当函数被执行的时候，就会生成函数的AO。
+            1、全局被执行时首先会生成GO，当函数被定义时就会创建自己的作用域链，它的作用域链和当前环境
+的作用域链相同。因此每个函数的作用域链底部都是GO。
+            2、函数被定义的时候只会创建函数的作用域和作用域链，函数被执行的前一刻才会在作用域链的最上方
+生成它的AO。当函数执行完后，就会销毁它的AO。程序又会返回到函数被定义的状态（上层函数），然后继续执行
+上层函数。当上层函数执行完毕后，销毁上层函数的AO，同时销毁函数的作用域。
+            3、AO/GO是引用类型，类似于对象，它们的值存储在堆内存中。作用域链存储着的是指向堆内存中
+对应的AO/GO的指针。因此每个函数的作用域链上都有指向GO的指针。
+            4、当外层函数被执行的时候，内层函数被定义，被定义时创建出自己的作用域和作用域链。此时内层函数
+的作用域链和外层函数执行时的作用域链一模一样。
+            5、函数根据作用域链访问变量和函数，先查看自己的变量对象中是否有要找的变量和函数，如果没有
+再往下查AO/GO中的变量对象是否有要找的变量和函数。外层函数的作用域链中没有内层函数的AO，所以外部函数无法
+访问内部函数的AO。
+            6、全局函数保存在GO中，想调用的时候，随时都可以调用。
+        */
+
+        function scopeOne() {
+            function scopeTwo() {
+                let m = 2;
+            }
+            let n = 1;
+            scopeTwo();
+        }
+        let o = 3;
+        scopeOne();
+
+        /*
+            执行全局         函数scopeOne    0-GO     scopeOne: function
+                                                    o: 3
+            执行scopeOne    函数scopeOne    0-AO     scopeTwo: function
+                                                    n: 1
+                                           1-GO     scopeOne: function
+                                                    o: 3
+                            函数scopeTwo    0-AO     scopeTwo: function
+                                                    n: 1
+                                            1-GO     scopeOne: function
+                                                    o: 3
+            执行scopeTwo    函数scopeTwo     0-AO    m: 2
+                                            1-AO    scopeTwo: function
+                                                    n: 1
+                                            2-GO     scopeOne: function
+                                                    o: 3
+          执行完scopeTwo     函数scopeOne    0-AO     scopeTwo: function
+                                                    n: 1
+                                           1-GO     scopeOne: function
+                                                    o: 3
+          执行完scopeOne     函数scopeOne    0-GO     scopeOne: function
+                                                    o: 3
+          程序执行完
+        
+        */
+
+        /*4、闭包
+            执行外部函数时，内部函数会被定义。当内部函数被定义时会生成和外部函数执行时相同的作用域链，
+作用域链中包含着外部函数的AO和GO。当内部函数被外部函数return出去时，外部函数执行完毕，此时本应该销毁
+外部函数的AO。可是内部函数的作用域链中引用了外部函数的AO，因此外部函数的AO不能销毁。这就是闭包。
+            闭包的作用之一就是把外部函数的AO中的变量变成私有变量，只能由内部函数访问。
+        */
+        //案例一： 
+        function test6() {
+            function test7() {
+                let b7 = 2;
+                console.log("%", a7)
+            }
+            let a7 = 1;
+            return test7
+        }
+        let c7 = 3;
+        let test8 = test6();
+        test8() //1
+
+        // 案例二：函数做闭包
+        function breadMgr(num) {
+            let breadNum = arguments[0] || 10; //变量成为了私有变量，只能由add和reduce函数访问。
+
+            function supply() {
+                breadNum += 10;
+                console.log(breadNum)
+            }
+
+            function sale() {
+                breadNum--;
+                console.log(breadNum);
+            }
+
+            return [supply, sale]
+        }
+
+        let bread = breadMgr(50)
+
+        bread[0]()
+        bread[1]()
+        bread[1]()
+
+        // 案例三：对象做闭包
+        function calendar(thing) {
+            let sunSched = '';
+            let operation = {
+                // 对象的方法 
+                setSched: function (thing) {
+                    sunSched = thing;
+                    console.log(sunSched)
+                },
+                showSched: function () {
+                    console.log("my schedule on sunday is " + thing)
+                }
+            }
+            return operation
+        }
+
+        let sun = calendar('studying')
+        sun.setSched('eating');
+        sun.showSched()
+
+        // 案例四：构造函数形成闭包
+        function Compute() {
+            let num = 0;
+
+            this.add = function () {
+                num++;
+                console.log(num)
+            }
+
+            this.mixins = function () {
+                num--;
+                console.log(num);
+            }
+        }
+
+        let compute = new Compute()
+        compute.add()
+        compute.mixins()
+
+
+        /*5、this
+            获取全局对象的方法：1、web: window self frames  this; 2、node: global;
+3、worker:  self。4、通用： globalThis
+            1、全局作用域中的this指向window。
+            2、普通函数作用域中的this指向window。
+            3、构造函数中的this指向实例对象。
+            4、类中的this指向实例对象。
+            5、箭头函数的this指向和箭头函数的外部(非箭头函数)执行上下文的this指向相同。
+箭头函数忽略任何形式的this指向的改变，即为静态this指向。  外部执行上下文的判断依据是谁在引用就是谁，
+如果没有明确的引用，那多半就是window在引用。
+            6、this的指向的基本原则：谁调用this的宿主，this就指向谁。
+            7、对象方法内部的this总是指向最近的引用（最近的引用作用域）
+            8、Object.defineProperty()配置项中的this指向paramsone，即被添加属性的对象。
+            8、事件处理函数内部的this总是指向被绑定事件的DOM元素。
+        */
+        console.log("window:", this)  //window
+        function nThis() {
+            console.log("function:", this)
+        }
+        nThis()  //window
+
+        let objs = {
+            sv: 2
+        }
+        var sv = 1;
+        const text = () => {
+            console.log("=>:", this.sv)  //1
+        }
+        text()
+        text.call(objs);
+        text.apply(objs);
+        let text1 = text.bind(objs);
+        text1()
+
+        // 
+        objs.text2 = () => {
+            console.log("&", this)  //this ->window
+        }
+        objs.text2();
+
+        // 
+        objs.text3 = function () {
+            let t = () => {
+                console.log(this) // this ->objs
+            }
+            t()
+        }
+        objs.text3()
+
+        // 
+        objs.text4 = function () {
+            setTimeout(() => {
+                console.log("*", this); // this -> objs
+            }, 0)
+        }
+        objs.text4()
+
+        // 
+        objs.text5 = function () {
+            let t1 = () => {
+                let t2 = () => {
+                    console.log(this)  // this -> obj
+                }
+                t2()
+            }
+            t1()
+        }
+        objs.text5()
+
+        objs.text6 = function () {
+            let t3 = function () {
+                let t4 = () => {
+                    console.log("!", this)  // this -> window
+                }
+                t4()
+            }
+            t3()
+        }
+        objs.text6()
+
+        // 
+        let objz = {
+            a: 1,
+            b: 2,
+            test: function () {
+                console.log(this.a)   // this -> objz
+            },
+            // 函数tezt在哪里声明，跟this指向的关系不大。
+            tezt: tezt,
+            c: {
+                d: 4,
+                tezt1: function () {
+                    console.log(this);   // this -> {d tezt1}，即objz.c
+                    console.log(this.d)
+                }
+            }
+        }
+
+        function tezt() {
+            console.log(this.b)   // this -> objz
+        }
+
+        objz.test();
+        objz.tezt();
+        objz.c.tezt1();
+
+        /*
+            this在t()的作用域中，t()作用域最近的引用就是window。t()既不属于obj2也不属于test3，
+因此最近的引用是window。也就是说t()是孤立函数，孤立执行。解析器会在此时隐式的执行window.t()，
+因为没有显示的对象去调用t()。因此this指向window
+        */
+
+        let obj2 = {
+            a: 1,
+            b: 2,
+            test3: function () {
+                function t() {
+                    console.log(this)  //this -> window
+                }
+                t()
+            }
+        }
+        obj2.test3()
+
+        //Object.defineProperty()配置项中的this指向paramsone，即被添加属性的对象
+        let obj3 = {};
+        // one是被添加属性的对象，two是添加的属性名称， three是配置项
+        Object.defineProperty(obj3, 'a', {
+            // 获取器：当访问obj3.a时，就执行这个函数。即拦截获取动作，让它做更多的事情。
+            get: function () {
+                // this -> obj3
+                console.log(this)
+                return 'I am a A';
+
+            },
+
+        })
+
+        /*
+            事件处理函数内部的this总是指向被绑定事件的DOM元素。可在面向对象的书写形式中，事件处理函数
+存储在实例对象中。因此需要使用bind()来将this指向从DOM元素，改为实例对象。这样点击DOM节点，才能触发
+实例对象中的事件处理函数。
+        */
+        // oBtn.addEventListener('click', function () {
+        //     console.log(this)
+        // }, false)
+
+        // bind(this)中的this是绑定事件外层作用域的this，即实例对象
+        // oBtn.addEventListener('click', this.Handle.bind(this))
+
+        //<button onclick="console.log(this)">test</button>  this指向button节点
+
+        // 儿子也必须吃父亲的水果
+        class Father {
+            constructor() {
+                // 让this永远指向Father实例对象。
+                this.eat = this.eat.bind(this)
+            }
+
+            get fruit() {
+                return 'apple'
+            }
+
+            eat() {
+                console.log('I am eating a ' + this.fruit)
+            }
+        }
+
+        class Son {
+            get friut() {
+                return 'pear'
+            }
+        }
+
+        const father = new Father()
+        const sons = new Son()
+        father.eat()
+        son.eat = father.eat;
+        son.eat()
+
+
+        // 5.1、call、apply、bind
+        /*
+            xxx.call(target,params)：将xxx的this只想
+            Friuts.call(newFriut, params)：将this的指向改为newFriut，params是Fruits执行所需的参数。
+            apply(newFruit，[parmas])：apply的逻辑和call相同，只是参数用数组装载。
+        */
+        function Friuts(name, color) {
+            this.brand = name;
+            this.color = color;
+            this.run = function () {
+                console.log(`running`)
+            }
+        }
+
+        let newFriut = {
+            displacement: '3.0'
+        };
+
+        /*
+           构造函数直接执行相当于是普通函数执行，因此this指向window。可是call将this的指向改为newFriut对象，
+           因此执行构造函数的时候，相当于是给newFriut对象添加属性。最后函数返回newFruit对象。
+           */
+        console.log(Friuts('orange', 'yellow')) //undefined，构造函数没有显示的返回值
+        Friuts.call(newFriut, 'apple', 'red');
+        Friuts.apply(newFriut, ['apple', 'red'])
+        console.log(newFriut)
+
+        let friut = new Friuts('orange', 'red')
+        console.log(friut)
+    </script>
+</body>
+
+</html>

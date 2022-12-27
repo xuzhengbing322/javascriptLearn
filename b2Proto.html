@@ -9,25 +9,96 @@
 </head>
 
 <body>
+    <button id="btn">点击</button>
+
     <script type="text/javascript">
-// 1、原型
-/*
-    程序员可以在函数上自定义属性，可这些函数的this指向函数本身，而且没有构造器和父原型。为了解决这些问题
-系统给函数设置了属性prototype，即原型。它是一个对象，其中包括构造器constructor和父原型prototype。
-在构造函数中，prototype中的this指向实例对象。因此，构造函数实例化时，this实例对象会继承原型上的属性
-和方法。因此，程序员想给函数添加属性和方法都是在原型prototype上添加，而非自定义属性。
-    每个构造函数都有自己的原型prototype，原型上还有它的父原型，由此形成原型链。实例对象调用属性的步骤是
-先在构造函数自身的属性中找，找不到再去原型prototype，然后一直顺着原型链找属性，直至Object.prototype。
+        /* 1、原型
+        对应名称：1、__proto__：对象，即普通对象、实例对象、原型对象都默认具有__proto__属性，
+__proto__属性的值为prototype原型对象。text.__proto__ === Text.prototype。
+2、函数，即普通函数、构造函数、类才有prototype原型对象。prototype中的constructor指向当前prototype
+的引用，即构造函数。prototype中的属性和方法就是constructor指向的构造函数的prototype的属性和方法。
+prototype中的__proto__指向父构造函数的prototype。
+3、原型链就是以一个对象为基准，以__proto__为连接，以prototype为节点的链条。链条的顶端是
+Object.prototype。
+        访问属性时，就是根据原型链来查找属性。先查找实例对象自身的属性，找不到再去prototype中查找，
+直至查找到属性并返回，或者找到Object.prototype依旧没找到属性，则返回undefined。
+        所有的对象的顶层原型都是Object.prototype。
+        构造函数其实也有__proto__，只不过它指向的是Function.prototype。
+        prototype是函数的属性，当实例化后，实例对象的__proto__就可以访问到prototype。但是实例对象上
+没有prototype属性，object.prototype === undefined。obj.__proto__和Funtion.prototype才可以访问
+到prototype对象
+        用户不能自己设置__proto__，系统会报错。而且，__proto__是系统的属性，用户只能更改，
+自造的__proto__没有系统的__proto__的默认效果。
+        
+        text {
+            a: 1,
+            __proto__: Text.prototype = {
+                                    b: 2,
+                                    constructor: f Text()
+                                    __proto__: Object.prototype = {
+                                                                 c: 3,
+                                                                 constructor: f Object()
+                                                                 __proto__: null
+                                                                }
+                                    }
+        }
+    
+        */ 
+
+    function Text () {
+        this.a = 1
+    }
+
+    Text.prototype.b = 2
+    Object.prototype.c  = 3
+    console.log("Text.prototype",Text.prototype)
+
+    const text = new Text();
+    console.log("test",text)
+    console.log("text.__proto__",text.__proto__);
+    console.log(text.__proto__ === Text.prototype) //true
+    console.log(Text.prototype.__proto__ === Object.prototype) //true
+    console.log(Object.prototype.__proto__) //null  
+    console.log(text.prototype)  //undefined
+
+
+
+    //objq的prototype中的constructor是Object。也就是说，objq是通过new Object()构造的 
+    const objq = {}  
+    const newObjq = new objq.constructor();  //构造一个新对象，也就是拷贝
+
+    console.log(objq)  //{}
+    newObjq.a = 1;
+    console.log(newObjq)  //{a:1}  
+
+
+
+    // Function Object: 函数、对象
+    console.log(Text.__proto__)
+    // 构造函数的__proto__指向Function的prototype
+    console.log("#",Text.__proto__ === Function.prototype) //true
+    const tezt = new Function()
+    console.log(Function.__proto__)
+    console.log(Function.__proto__ === Function.prototype)  //true
+
+    console.log(typeof Object) //function
+    console.log(Object.__proto__ === Function.prototype);  //true
+    console.log(Object.__proto__ === Function.__proto__)  //true
+    //    text.constructor指向的是构造函数Text
+    console.log(text.constructor === Text)  //true
+
+   /*2、prototype的特点
+   prototype中的this默认指向实例对象。程序员在函数上自定义属性和方法中的this默认指向window。因此，
+程序员想给函数添加属性和方法都是在原型prototype上添加，而非自定义属性。
     构造函数每次实例化都相当于是要给实例对象添加属性和方法。将静态的属性和方法写在原型上，将动态的属性写在
 构造函数中，避免静态属性和方法经历实例化的过程。因此，构造函数内部，挂载到this上的都是可配置的属性变量
     给构造函数的原型添加属性和方法，建议使用Fun.prototype.init =function() {}，而不是
 Fun.prototype = { init : function() {}}。这样避免将以前写在原型上的属性和方法给覆盖了。
     实例对象无法增加/删除/更改prototype中的属性，它只能增加/删除/更改的是构造函数中的属性。
-    原型是对象，因此在给原型prototype添加属性和方法时，一般都是以对象的形式添加。
     打印实例对象，会显示this对象中的属性，而prototype上的属性和方法在prototype对象中。    
         */
         //    function Telephone() {}
-           function Handphone(color, brand) {
+        function Handphone(color, brand) {
             console.log(this)  //打印属性方法齐全的实例对象，
             this.color = color;
             this.brand = brand;
@@ -46,73 +117,58 @@ Fun.prototype = { init : function() {}}。这样避免将以前写在原型上�
 
            let hp1 = new Handphone('red', '小米')
            let hp2 = new Handphone('black', '华为')
-           console.log(hp1.rom);
-           console.log(hp2.ram);
-           console.log(hp1.screen)
-           console.log(hp2.screen)
+           hp1.rom = '32G'  //这只是给实例对象添加属性，并不能修改原型上的属性。
+           console.log(hp1.rom);  //32G
+           console.log(hp2.rom);  //64G
            hp2.call()
            console.log(hp1)
            console.log(hp1.constructor)
            console.log(Handphone.prototype)  //构造器constructor -> 构造函数本身
 
-// 2、构造函数的this中的proto属性
-/*
-    实例化构造函数以后，自动生成this对象。this对象中默认有__proto__，它的默认值是构造函数的原型。
-因此，原型一定是属于实例对象的，而非属于构造函数。__proto__也属于实例对象，而不属于构造函数。
-__proto__是prototype的键名，这样系统内部就可以通过__proto__来访问原型prototype。
-    用户使用prototype，本来需要this.__proto__.prototype。可javascript认为__proto__是系统内部键名，
-所以用户使用prototype只需要this.prototype即可。
-    实例对象查询属性是先在自身this对象中找相应的属性。如果没有，就通过__proto__找到原型，然后在原型中
-寻找相应的属性。
-    原型链的顶端是Object.prototype
-    用户不能自己设置__proto__，系统会报错。而且，__proto是系统的属性，用户只能更改，不能自造，自造没效果。
-        */
-           function Car() {
-            //    let this = {
-            //     __proto__: Car.prototype 
-            //    }
-           }
-
-           Car.prototype.name = 'Benz';
-           let car = new Car();
-           console.log(car)
-           console.log(car.name)
-
-// 3、构造器constructor
-/*
-    构造器constructor存在于prototype中，constructor默认指向构造函数本身，当然也可以修改构造器的指向。
-实例化构造函数就是将原型中的构造器给实例化。
-构造器存储着构造函数的原型中为被实例化的属性和方法。实例化构造函数时，构造器中的内容就会变成原型上的内容。
-    也就是说，constructor保存的是实例化之前的东西。实例化之后。
+/*3、构造器constructor
+    构造器constructor存在于prototype中，constructor默认指向当前prototype的引用构造函数。当然也可以
+修改构造器的指向。实例化构造函数就是将原型中的构造器给实例化。
+    构造器存储着构造函数的prototype中未被实例化的属性和方法。实例化构造函数时，构造器中的内容就会变成
+prototype上的内容。也就是说，constructor保存的是实例化之前的东西。
     Car.prototype.constructor -> Car() -> prototype -> name:apple
-    在没有构造函数没有实例化之前，构造函数.prototype.constructor指向的就是构造函数本身。
-构造函数的prototype中有name属性。当构造函数实例化的时候，就是将构造器的属性拿到实例对象中的prototype中。
+    在构造函数没有实例化之前，构造函数.prototype.constructor指向的就是构造函数本身。构造函数
+的prototype中有name属性。当构造函数实例化的时候，就是将构造器的属性拿到实例对象中的prototype中。
         */
 
         function Telephone() {
             this.name = '张三';
         }
+        Telephone.prototype.number = '18100000000'
         console.log(Telephone.prototype)
 
-           Food.prototype.name = 'banana';
-           function Food() {}
-           let food = new Food()
-           Food.prototype = {
-               name: 'apple'
-           }
-           let food2 = new Food()
-           console.log('food1',food)
-           console.log('food2',food2)
-
-// 把构造函数Food的原型prototype中的constructor指向构造函数Telephone，原本默认指向构造函数Handphone
+        Food.prototype.name = 'banana';
+        function Food() {
+            this.price = "12"
+        }
+        let food = new Food()
         Food.prototype = {
+            name: 'apple'
+        }
+        let food2 = new Food()
+        console.log('food',food) //food的prototype中的name属性值为banana
+        console.log('food2',food2)  //food2的prototype中的name属性值为apple
+
+        /*把构造函数Food的原型prototype中的constructor指向构造函数Telephone，原本默认指向
+构造函数Handphone。new Food()依旧是实例化Food()，但通过new food3.constructor()实例化的就是
+Telephone()。
+        */ 
+        Food.prototype = {
+            snumber : '11100000000',
             constructor: Telephone
         }
 
         let food3 = new Food()
+        let newFood3 = new food3.constructor()
         console.log('food3',food3)
+        console.log('newFood3',newFood3)
 
-//原则上原型只能增删改自己的属性，子原型无法改父原型中的属性。实际上可以修改，但是不推荐。
+
+//实例对象可以修改父构造函数中的属性，因为prototype的this指向实例对象。但是不推荐。
         Professor.prototype.tSkill = 'JAVA';
         function Professor() {}
         let professor = new Professor();
@@ -159,95 +215,9 @@ __proto__是prototype的键名，这样系统内部就可以通过__proto__来�
 
 
 
-//4、创建对象的方法
-/*
-    使用{}创建：let obj1 = {}。
-    实例化Object()：new Object()  两种创建方式完全相等。
-    如果对象是通过构造函数构造出来的，则constructor指向构造函数。如果对象是普通的对象，则constructor
-指向Object()。
-    new的作用：1、根据构造函数生成实例对象。2、根据构造函数的原型生成实例对象的原型。
-    原型的原型是由系统自带的Object构造出来的。
-    Object.create(params)：用户自定义原型，然后实例化出实例对象。
-*/  
-        let some = {
-            num: 2
-        }
-
-        function Obj() { }
-        Obj.prototype.num = 1;
-        let obj1 = Object.create(some)  //把some作为obj1的原型。
-        let obj2 = new Obj();
-        console.log(obj1);
-        console.log(obj2);
-
-        // 使用null作为参数，实例对象没有原型。这就证明不是所有的对象都继承于Object.prototype
-        let obj3 = Object.create(null)
-        console.log(obj3)
-        obj3.num = 1;  //给对象添加属性
-        let obj4 = Object.create(obj3)  //然后将对象作为obj4的原型来实例化
-        console.log(obj4)
- 
-
-// 5、原型上的toString()
-/* Number和Object的原型都有toString，但原型进行了方法的重写，所以实现的功能不同。
-原型上的toString()主要是用于判断数据的类型。
-undefined null 没有toString()，因为undefined和null不能经过包装类。它们也没有原型
-*/
-        console.log(Object.prototype.toString.call(1)) //[object Number]
-        console.log(Object.prototype.toString.call('a'))  //[object String]
-        console.log(Object.prototype.toString.call(true)) //[object Boolean]
-        console.log(Object.prototype.toString.call([12, 23])) //[object Array]
-        console.log(Object.prototype.toString.call({}))  //[object Object]
-        console.log(Number.prototype.toString.call(1))  //'1'
-        // console.log(undefined.toString())  //报错
-
-
-        // // 原始值可以经过包装类
-        // num.toString();
-        // // new Number(1) -> toString()
-        // // num2对象有自己的构造器和toString()方法。
-        // let num2 = new Number(num)
-        // function test() {
-        //     console.log('a')
-        // }
-        // test()
-        // // test.call()
-
-
-// 6、call、apply
-/*
-    Friuts.call(newFriut, params)：将this的指向改为newFriut，params是Fruits执行所需的参数。
-    apply(newFruit，[parmas])：apply的逻辑和call相同，只是参数用数组装载。
-*/ 
-        function Friuts(name, color) {
-            this.brand = name;
-            this.color = color;
-            this.run = function () {
-                console.log(`running`)
-            }
-        }
-
-        let newFriut = {
-            displacement: '3.0'
-        };
-
-    /*
-    构造函数直接执行相当于是普通函数执行，因此this指向window。可是call将this的指向改为newFriut对象，
-    因此执行构造函数的时候，相当于是给newFriut对象添加属性。最后函数返回newFruit对象。
-    */    
-        console.log(Friuts('orange','yellow')) //undefined，构造函数没有显示的返回值
-        Friuts.call(newFriut, 'apple', 'red');
-        Friuts.apply(newFriut, ['apple', 'red'])  
-        console.log(newFriut)
-
-        let friut = new Friuts('orange', 'red')
-        console.log(friut)
-
-
-
-// 7、原型链继承
-/*
-    将构造函数A的实例对象a赋给构造函数B的原型。相当于是在栈空间开辟一个空间名为构造函数B原型的空间，
+/* 4、原型链继承
+    TeacherB.prototype = professora将父构造函数的实例对象赋给子构造函数的原型
+将构造函数A的实例对象a赋给构造函数B的原型。相当于是在栈空间开辟一个空间名为构造函数B原型的空间，
 里面存储实例对象a的指针。原来的构造函数原型空间就被销毁了。因此当构造函数B的实例对象想访问构造函数B
 的原型时，相当于是访问实例对象a。由此实现了继承。
 通过将构造函数的实例对象赋给
@@ -558,6 +528,46 @@ undefined null 没有toString()，因为undefined和null不能经过包装类。
         //     }
         // */ 
 
+        // 对象中的this指向对象本身。
+        let obj7 = {
+            numbers: 1,
+            funcs: function() {
+                console.log(this)  //this指向当前方法的上层对象
+                console.log(this.numbers)
+
+                function ot() {
+                    console.log(this)
+                }
+                ot()  //window
+            }
+        }
+
+        obj7.funcs()
+
+        // 事件处理函数的this指向。谁被绑定事件处理函数，事件处理函数的内部的this就指向谁。
+        let oBtn = document.getElementById('btn');
+        oBtn.onclick = function () {
+            console.log(this);  //<button>
+            this.innerHTML = '加载中...';
+            this.disabled = true;
+
+            // setTimeout函数中的this本身指向window，但是bind将函数内部的this替换成外部的this，即事件处理函数中的this
+            setTimeout(function(){
+                console.log(this);
+                this.innerHTML = '点击';
+                this.disabled = false;
+            }.call(this),2000)
+            /*call/apply()  bind()的区别在于：func.call()，那么call就会把(this)替换掉func中的this，
+            然后立即执行func函数。这就违背了延迟执行函数的初衷。bind(this)会生成一个新函数替换以前的函数，
+            新函数中的this是(this)中的。新函数并不会立即执行
+            call/apply/bind(context,params)。call和bind的参数都是1，2，3形式，apply参数是数组形式。
+            参数是函数的实参。
+
+            */ 
+        }
+
+
+
         /*
         callee/caller
         callee：返回正在被执行的函数对象。callee是实参列表中的一个属性。
@@ -599,6 +609,13 @@ undefined null 没有toString()，因为undefined和null不能经过包装类。
         // function test2() {
         //     console.log(test2.caller())
         // }
+
+
+        
+
+
+
+
     </script>
 </body>
 

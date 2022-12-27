@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script type="text/javascript">
+        /*1、转义
+        1.1、转义的含义：转换意义。转义符号\。转义字符:\字符。
+        1.2、为什么：编程过程中，有时候使用符号原本的意思会产生语法错误。因此，通过转义符号，
+    将字符原本的意思转变成其他意思，从而解决语法错误。
+        1.3、双引号中又有双引号就会报syntaxError语法错误。原因：系统识别代码时，javascript先解析语法，
+    即把两个双引号看作是两个字符串。然后再以文本的形式将字符串内容赋给变量。当做文本输出时，
+    系统发现发现字符串和变量之间没有通过+连接，因此报语法错误。  
+        改进：通过转义符号\，将"的意思从字符串的前后引号，转变为普通的字符，从而避免语法报错。
+        1.4、通常\把字符转换成无意义的字符。系统也会特定的转义字符设置特定的含义。例如，\n：换行，
+    \r：回车，\t：制表符，缩进4个字符
+        1.5、转义字符是给编辑系统使用的，\n在编辑器和控制台中的意思是换行，但在html页面中\n就没有意义。
+    html是纯文本，即编译后就把文本显示出来。html不能识别\n，但\n又占用了字符，因此\n在html中显示为空格。
+        1.6、双引号和单引号的字符串默认为单行，多行字符串需要通过+拼接实现，或者采用``，或者在单行后面
+    添加\，即将系统默认的\n转义为空格。
+        */
+        // let strOne = "我是一名"优秀"的程序员";
+        let strTwo = "我是一名\"优秀\"的程序员";
+        let strThree = "我是一名\n优秀\n的程序员";
+        console.log("str", strThree)
+        document.write(strThree)
+
+        /*2、正则表达式RegExp： regular expression正规的表达式
+        2.1、正则表达式就是操作字符串的一种规则。程序按照正则表达式的规则，匹配和检索指定的或指定类型
+    的字符，或者是一些特殊的字符。
+        2.2、使用场景：1、判断用户输入的信息是否合法，如邮箱地址、用户名。2、替换数据中的某些字符串。
+    3、替换模版。
+        2.3、创建正则表达式的方式：第一种：new RegExp()。第二种：//。
+        RegExp(one, two)：one是匹配规则，即要匹配的内容。two是匹配修饰符，即设置匹配的方式。   
+        //：/one/two。  可见，正则表达式的关键就在于匹配规则和匹配修饰符。
+        RegExp()和//的区别：RegExp()可以把变量当作匹配规则，而//不行。
+        2.4、匹配修饰符
+        如果不使用修饰符，那匹配到一个值就终止匹配。常见的匹配修饰符：\i：忽略大小写(ignore case)，
+    \g：全局匹配(global)， \m：多行匹配(multi-line)，
+        */
+        //以正则表达式reg为规则，匹配strFour里面是否包含test。   
+        let reg = new RegExp('a'),
+            strFour = 'This is a test';
+        console.log(reg.test(strFour))  //true
+        console.log(strFour.match(reg))  //['a']
+
+        let v = 'is';
+        let regTwo = new RegExp(v)
+        let regThree = /v/
+        console.log(regTwo.test(strFour))  //true
+        console.log(regThree.test(strFour))  //false
+
+        /*3、匹配修饰符
+        3.1、如果不使用匹配修饰符，默认匹配到成功一次就终止匹配。如果想改变匹配方式，就要使用匹配修饰符。
+        3.2、常见的匹配修饰符：
+            \i：忽略大小写(ignore case)。
+            \g：全局匹配(global)。
+            \m：多行匹配(multi-line)。
+            \y：另一种全局匹配。它从第一个字符开始匹配，匹配成功就继续匹配，匹配失败就停止匹配。
+        */ 
+
+        let strFive = 'try Again and again \n  please try again',
+            regFour = /again/i,
+            regFive = /again/ig,
+            regSix = /again/iy;
+        console.log(strFive.match(regFour)) //['Again']
+        console.log(strFive.match(regFive)) //['Again','again','again']
+        console.log(strFive.match(regSix))  //null
+        
+        /*3、正则表达式的特殊符号
+        3.1、正则表达式的特殊符号是用于匹配规则中，以便满足更多的匹配需求。
+        3.2、匹配的规则是：从左往右依次匹配。匹配成功就不在考虑这些字符。
+        3.3、常见的特殊符号：
+            表达式[]：[]只匹配一个字符，[]内是匹配的范围，连续使用[]表示连续匹配字符。
+            ^：表达式[]中的^表示非。其他地方表示匹配字符串的开始。
+            $：匹配字符串的结束，忽略换行符
+            ｜：表示或。|左右两侧有一个匹配成功即可。
+            ()：表示优先匹配，常和|一起使用。
+            {n}：表示n位的数字或字符
+        */
+        let strSix = '0985Aafa-847sjdhfb-sdnfi';
+            regSeven = /[0123456789][0123456789][0123456789]/g,  
+            regEight = /[0-9][A-Z][a-z]/,  
+            regNight = /[^5][a-z]/,
+            regTen = /(985|847)[A-z]/g,
+            reg1 = /\d{3}/g;
+        console.log(strSix.match(regSeven))  //['098','847']
+        console.log(strSix.match(regEight))  //['5Aa']
+        console.log(strSix.match(regNight))  //['Aa']
+        console.log(strSix.match(regTen))  //['985A','847s']
+        console.log(strSix.match(reg1))   //['098','847']
+
+        /*4、元字符
+        4.1、元字符是正则自定义的具有特殊意义的转义字符。在匹配规则中使用。
+        4.2、常见的元字符：
+            \w === [0-9A-z_], \W === [^\w]
+            \d === [0-9], \D === [^\d]
+            \s === [\r\n\t\v\f] \v：垂直换行，\f换页符。 \S === [^\s]
+            \b 单词边界  \B 非单词边界。
+            .  匹配除换行符（\r\n）外的任意字符
+        */ 
+
+        /*5、量词
+        5.1、正则匹配的原理：1、字符串从左到右，依次先匹配多，再匹配少。如果一旦匹配上就不回头匹配。
+    2、贪婪模式：能匹配多，就匹配少。注意：匹配规则中写了空字符串就真的要匹配空字符串。
+        5.2、常见的量词：
+            {n,m}: n表示最少连续匹配多少个，m表示最多连续匹配多少个。
+            n+ {1,正无穷}：n表示匹配范围，+匹配成功一次或多次。n+表式n出现一次或多次的字符都匹配。
+            +的意思是匹配n范围内任意一个字符出现一次或多次的字符串。
+            n* {0,正无穷}: *的意思是匹配n范围内任意一个字符出现0次或者多次的字符串。
+            n? {0,1}：
+            n{x,y}：x表示最少匹配多少个，y表示最多匹配多少个。+、*、？是它的特殊情况。
+            ^n：匹配任何以n开头的字符串
+        */ 
+        let reg2 = /\w+/g,
+            reg3 = /\w*/g,
+            reg4 = /\d*/g,
+            reg5 = /\w?/g,
+            reg6 = /\w{1,2}/g,
+            reg7 = /\w{5,}/,
+            reg8 = /^ab/g,
+            reg9 = /cd$/g,
+            str1 = 'abcdefg';
+        
+        // 符合\w的字符出现七次，则把这七次匹配出来。贪婪模式能匹配多就不匹配少。
+        console.log(str1.match(reg2))  //['abcdefg']
+        //贪婪模式能匹配多就不匹配少，因此会把abcdefg全匹配了。最后发现还有个空字符。因为*表示从0开始，所以空字符也匹配出来了。
+        console.log(str1.match(reg3))  //['abcdefg','']
+        console.log(str1.match(reg4))  //["","","","","","","",""]
+        console.log(str1.match(reg5)) //["a","b","c","d","e","f","g",""]
+        console.log(str1.match(reg6)) //["ab","cd","ef","g"]
+        console.log(str1.match(reg7)) //["abcdefg"]
+        console.log(str1.match(reg8)) //["ab"]
+        console.log(str1.match(reg9))  //null
+
+        // 5.3、思考题：检查字符串是否以abcd开头和(或｜)以abcd结尾
+        let str2 = 'abcd124abcd',
+            reg10 = /^abcd$/g,  //意思是以abcd开头并且以同一组abcd结尾。
+            reg11 = /^abcd[\s\S]*abcd$/,  //[\s\S]表示任意字符，*表示任意个数，从而隔开中间
+            reg12 = /^abcd.*abcd$/;
+        console.log(str2.match(reg10)) //null  
+        console.log(str2.match(reg11))  //['abcd124abcd']
+        console.log(str2.match(reg12))  //['abcd124abcd']
+
+        // 5.4、思考题：检查字符串是否以abcd开头和以abcd结尾，并且开头结尾之间是数字
+        let str4 = 'abcd123123abcd',
+            reg13 = /^abcd\d+abcd$/g;  
+        console.log(str4.match(reg13)) //['abcd123123abcd']
+
+        //5.5、思考题：匹配以138开头的11位手机号码
+        let str5 = '13811111111',
+            reg14 = /^138\d{8}/g;
+        console.log(str5.match(reg14)) //['13811111111']
+
+        /*6、特殊的匹配规则
+        6.1、正向预查 
+        ?=n 匹配任何其后紧接着指定字符串n的字符串。例如，1(?=2)：匹配1后面紧跟2的1。
+        ?!n 匹配任何其后不紧接着指定字符串n的字符串。
+        子表达式：()括起来是使用子表达式的一种方式。子表达式有记忆。当它确定后，后面的反向引用使用的就是它。
+        反向引用：\n是反向引用第n个表达式。子表达式和反向引用主要用于匹配xxxx  xxyy格式的数据。
+        */ 
+        let str6 = 'abcdabcde',
+            str7 = 'bbaaaaccaaaaiddddbaaaa',
+            reg15 = /a(?=b)/g,
+            reg16 = /d(?!a)/,
+            reg17 = /(a)\1\1\1/g,
+            reg18 = /(\w)\1\1\1/g,
+            reg19 = /(\w)\1(\w)\2/g; 
+        console.log(str6.match(reg15))   //["a","a"] 后面紧跟着b的a。
+        console.log(str6.match(reg16))   //['d']
+        console.log(str7.match(reg17))  //['aaaa','aaaa','aaaa']
+        console.log(str7.match(reg18))  //['aaaa','aaaa','dddd','aaaa']
+        console.log(str7.match(reg19))  //['bbaa','aacc','aaaa','dddd','aaaa']
+
+
+        /*7、reg对象自带的对象和方法
+        7.1、reg.exec()：机械式循环匹配。 exec：execute执行
+        exec()：在g模式中，执行一次匹配一次，其中index值为匹配位置开头的下标。当匹配结束后返回null
+    并回到最开始重新匹配。  在非g模式中，只匹配第一个可匹配的片段，且只匹配一次。
+        7.2、reg.lastIndex：它记录匹配结果的末尾字符在原字符串的位置。
+    可见，lastIndex属性和exec()中的index是吻合的。也就是说，我可以通过lastIndex来调整exec()执行步骤。
+    但程序员乱调lastIndex，exec()会按正确的方式执行，并将lastIndex调回正确的值。
+        7.3、str.match(reg)：match是自动循环匹配。根据reg正则表达式规则去匹配str中符合条件的字符串，
+    将符合条件的字符串填入数组，并最后返回出去。  在非g模式下，返回第一个被匹配的片段，并返回子表达式中
+    的字符串。 在g模式下，返回所有可被匹配的片段，但不返回子表达式中的字符串。
+        7.4、str.split(reg)：字符串分裂。根据reg正则表达式规则去分裂str字符串
+        7.5、reg.test(str)：判断str是否有符合reg规则的字符串。有就返回true，没有就返回false。
+        */
+       
+        let str8 = '123123123',
+            reg20 = /123/g;
+        console.log(reg20.lastIndex)  //0
+        console.log(reg20.exec(str8)) //0
+        console.log(reg20.lastIndex)  //3
+        console.log(reg20.exec(str8))  //3
+        console.log(reg20.lastIndex)  // 6 
+        console.log(reg20.exec(str8))
+        console.log(reg20.lastIndex)  //9
+        console.log(reg20.exec(str8))  //null
+        console.log(reg20.lastIndex)   //0
+        console.log(reg20.exec(str8))
+        console.log(reg20.lastIndex)  //3
+
+        let str9 = 'abcd1abde3asfk',
+            reg21 = /\d/g;
+        console.log(str9.split(reg21))   //['abcd','abde','asfk']
+    </script>
+</body>
+
+</html>
