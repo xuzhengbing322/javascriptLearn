@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        /**1、for\ for in \ for of
+         * 循环、遍历、迭代
+         * 循环：循环是语言层面的语法，它是重复执行一段程序的方案。
+         * 遍历：业务层面上的做法，它是观察或者获取集合中的元素的一种做法
+         * 迭代：实现层面上的概念，实现遍历的底层方案其实就是迭代
+         * 
+         * EXMAScript3的时候，没有针对可迭代对象的具体的遍历方法，只有语言层面的for循环。
+         * ECMAScript5的时候，增加了7个专门针对数组的遍历方法，增加了针对对象的遍历方法(for in)
+         * 七个方法：forEach map filter reduce reduceRight some every
+         * for...in 语句以任意顺序遍历一个对象的除Symbol以外的可枚举属性。for in 是为遍历对象属性
+而构建的，不建议与数组一起使用。它找的是对象的属性键名key。for in 不能遍历Map类型和Set类型的数据。
+数组本质上也是对象，因此for in 也可以遍历数组，下标就是键名，元素就是键值。但是不推荐for in 遍历一个关注
+索引顺序的Array。
+         *for...of语句在可迭代对象（包括Array，Map，Set，String，TypedArray，arguments对象等等）
+上创建一个迭代循环，调用自定义迭代勾子，并为每个不同的属性的值执行语句。也就是说，for..of迭代的是value，
+即元素。
+         *当需要对一个对象进行迭代时（比如开始用一个for of循环中），它的@@iterator方法都会在不传参
+情况下被调用，返回的迭代器用于获取要迭代的值。一些内置类型拥有默认的迭代器行为，其他类型（如object）则没有。
+也就是说，使用for..of的条件是有迭代器，Symbol.iterator
+         *{}是无序的，[]是有序的 
+         */
+
+        let arr = [1, 2, 3];
+        let m = new Map([[{ a: 1 }, 1], [{ b: 2 }, 2], [{ c: 3 }, 3]]);
+        let s = new Set(['a', 'b', 'c']);
+
+        for (let i = 0; i < arr.length; i++) {
+            console.log(arr[i], i, arr);  //重复执行这段程序
+        }
+
+        /**item是数组的每项元素，index是元素所对应的下标，array就是数组本身。
+         * arr.forEach其实和for循环完全相同，只是arr.forEach更直观，是数组原型上的的方法
+         * */
+        arr.forEach(function (item, index, array) {
+            console.log(item, index, array)
+        })
+
+        let objIn = {
+            a: 1,
+            b: 2,
+            c: 3
+        }
+        for (let key in objIn) {
+            console.log(key, objIn[key])
+        }
+
+        //  for in 也可以遍历数组
+        for (let key in arr) {
+            console.log(key, arr[key])  //0 1, 1 2, 2 3
+        }
+
+        //  for in 不能遍历Map类型的数据
+        for (let key in m) {
+            console.log(key)
+        }
+
+        //  for in 不能遍历Set类型的数据
+        for (let key in s) {
+            console.log(key)
+        }
+
+        //  报错：objIn is not iterable
+        // for (let value of objIn) {
+        //      console.log(value)
+        //  } 
+        for (let value of arr) {
+            console.log(value)
+        }
+
+        for (let value of m) {
+            console.log(value)
+        } 
+
+        // 可以将数组元素中的元素给解构出来。
+        for (let [one, two] of m) {
+            console.log(one, two)
+        } 
+
+
+        /**2、生成器和迭代器
+         * 
+         * 
+         * */ 
+
+        //  生成器的作用就是返回(生成)一个迭代器
+        function *generator (arr) {
+            for (let v of arr) {
+                // yield的作用就是产出一个值，就暂停下来。
+                yield v;
+            }
+        }
+
+        // const iterator = generator(arr)
+        const iterators = myGenerator(arr)
+
+        /*
+            for (let i = 0; i<= arr.length; i++) {
+                console.log(iterator.next());
+            }
+        */ 
+
+        // next()作用就是执行一次，输出这次迭代的值。done表示是否完成，即后面还是否可以迭代。
+        // 实际上迭代就是每次都执行next()
+        // console.log(iterator.next())
+        // console.log(iterator.next())
+        // console.log(iterator.next())
+        // console.log(iterator.next())
+
+        // 重写generator
+        function myGenerator (arr) {
+            // 遍历次数，从0开始算起
+            let nextIndex = 0;
+
+            return {
+                // generator()返回的是对象(iterator)，对象中有next()
+                next () {
+                    /**next()返回下面这个对象
+                     * {
+                     *      value: ?,
+                     *      done: ?
+                     * }
+                     * */ 
+                    return nextIndex < arr.length
+                    ?
+                    // 如果nextIndex小于arr.length，那么value就是arr[nextIndex]，并且返回之后nextIndex自加1
+                    {
+                        value: arr[nextIndex ++ ],
+                        done: false
+                    }
+                    :
+                    {
+                        value: undefined, done: true
+                    }
+                }
+            }
+        }
+
+        console.log(iterators.next())
+        console.log(iterators.next())
+        console.log(iterators.next())
+        console.log(iterators.next())
+
+
+        // 给有序对象添加迭代器
+        const oObj = {
+            0: 1,
+            1: 2,
+            2: 3,
+            length: 3
+        }
+
+        // 给oObj原型添加迭代器
+        Object.prototype[Symbol.iterator] = iterator
+
+        function iterator () {
+            let index = 0;
+            // 谁调用interator，this指向谁。
+            var _this = this;
+
+            return {
+                next () {
+                    return index < _this.length
+                    ?
+                    { value: _this[index ++ ], done: false}
+                    :
+                    { value: undefined, done: true}
+                }
+            }
+        }
+
+        for (let v of oObj) {
+            console.log(v);  //1 2 3 
+        } 
+    </script>
+</body>
+
+</html>

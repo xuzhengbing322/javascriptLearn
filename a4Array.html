@@ -11,9 +11,9 @@
 <body>
     <script>
         /*1、数组
-            数组本质上就是一个对象。
-        */ 
-        const arr = [1,2,3]
+            数组本质上就是一个对象，数组的序号是键名，元素是键值。
+        */
+        const arr = [1, 2, 3]
 
         /*
             arr = {
@@ -21,30 +21,36 @@
                 '1': 2,
                 '2': 3
             }
-        */ 
+        */
 
 
 
         /* 2、数组的常用方法：
-            1、push()：增添元素到数组的末尾，并且不会生成新数组。若用变量接收arrayName.push()，
-得到的是新数组的长度。
-            2、unshift()：添加元素到数组的头部，并且不会生成新数组。若用变量接收arrayName.unshift()，
-得到的是新数组的长度。
-            3、pop()：删除数组末尾的元素，并不会生成新数组。若用变量接收arrayName.pop()，
-得到的是被删的末尾元素
-            4、shift()：删除数组头部元素，并不会生成新数组。若用变量接收arrayName.shift()，
-得到的是被删的头部元素
-            5、indexof()：找到元素的索引值。如果不存在，则返回 -1。indexOf为splice提供删除元素的位置。
-            6、splice(target,num)：删除元素。target是被删元素的索引位置，number是往后删除几个元素。
-            7、slice()：复制一个数组。
-            8、arrayName.forEach((item)=>{})：遍历数组的每项数据，并且每项数据都执行一次函数。
+            1、array.push()：增添元素到数组的末尾，并且不会生成新数组。方法返回数组新的长度。
+            2、array.unshift()：添加元素到数组的头部，并且不会生成新数组。方法返回数组新的长度。
+            3、array.pop()：删除数组末尾的元素，并不会生成新数组。方法返回被删除的末尾元素。
+            4、array.shift()：删除数组头部元素，并不会生成新数组。方法返回被删除的头部元素。
+            5、array.indexOf('xxx')：找到元素xxx的索引值。如果存在返回元素的索引，如果不存在，
+则返回 -1。indexOf常为array.splice()提供删除元素的位置。
+            6、array.splice(index, number)：删除元素。index是被删元素的索引位置，number是要往后
+删除的元素数量。
+            7、array.slice()：浅拷贝array数组，返回新数组。
+            8、array.forEach((item)=>{})：遍历数组的每项数据，并且每项数据都执行一次函数。
 方法只是操作原数组，并不会生成新数组。因此函数一般没有返回值。
-            9、map()：创建一个新数组，这个新数组由原数组中的每个元素都调用一次提供的函数后的返回值组成。不符合调用函数的元素，则直接原样
+            9、array.map()：创建一个新数组，这个新数组由原数组中的每个元素都调用一次提供的函数后的返回值组成。不符合调用函数的元素，则直接原样
 返回新数组。使用场景：若数组元素为对象，map可以很方便的修改对象的属性，并将新的元素组成数组。
 forEach和map的区别：forEach不生成新数组，map生成新数组。
-            10、filter()方法创建一个新的数组，新数组中的元素是指定数组中符合条件的所有元素。
-                使用场景：通常用于过滤数组中的某些元素，例如删除操作。
-            11、find()方法返回数组中满足提供的测试函数的第一个元素的值。否则返回 undefined。 
+            10、array.filter()：方法创建一个新的数组，新数组中的元素是指定数组中符合条件的所有元素。
+使用场景：通常用于过滤数组中的某些元素，例如删除操作。
+            11、array.find()：方法返回数组中满足提供的测试函数的第一个元素的值。否则返回 undefined。
+            12、array.every(fn, thisObj)：判断所有数组元素是否都满足判断条件。如果都满足则every()
+返回值是true，如果有一个不满足，则every()返回值是false。return 后面是判断条件。 
+            13、array.some(fn, thisObj)：判断数组元素是否满足条件。只要数组元素有一个满足条件，则
+返回的结果是true。如果都不满足条件，some()返回的结果才是false。 return后面是判断数组元素的条件。
+            14、array.reduce(fn, initialValue)：fn中的参数多了prev，prev和initialValue具有相同
+的引用指针。initialValue相当于是初始容器，每个数组元素都要执行fn，执行的时候向prev数组添加/修改元素，
+最终reduce()返回prev。reduce()的意思是归纳。
+            15、array.reduceRight()就会从遍历数组的方向是从右到左，功能完全相同。
         */
 
         let animal = ["dog", "cat", "panda"];
@@ -68,6 +74,7 @@ forEach和map的区别：forEach不生成新数组，map生成新数组。
         // slice()
         let shallowCopy = animal.slice()
         console.log("the copy array is:", shallowCopy)
+        console.log(shallowCopy === animal)  //false
 
         let photo = [{
             title: "华为",
@@ -97,7 +104,7 @@ forEach和map的区别：forEach不生成新数组，map生成新数组。
 
         // map
         // {title}是只获取item中的title属性。
-        let photoTitle = photo.map(({title}) => {
+        let photoTitle = photo.map(({ title }) => {
             return title
         })
         console.log("photo title is:", photoTitle)  //photo title is: [ '华为', '小米' ]
@@ -119,6 +126,274 @@ forEach和map的区别：forEach不生成新数组，map生成新数组。
             }
         })
         console.log("newNumFindArray:", newNumFindArray)  //newNumFindArray: 24
+
+
+
+
+        let arrTest = [
+            {
+                name: '张三',
+                age: 34
+            },
+            {
+                name: '李四',
+                age: 25
+            },
+            {
+                name: '王五',
+                age: 21
+            },
+            {
+                name: '赵六',
+                age: 28
+            }
+        ];
+
+        let objTest = {
+            name: 'Jacky',
+            age: 3
+        }
+        
+        /**array.forEach(fn, thisObj)
+         * 方法的参数1是函数，函数的参数有item：数组的每个元素，index：元素的下标，array：数组本身。
+        每个item都要执行一次函数体。thisObj指定fn函数参数中的this指向。如果没有thisObj，则函数中的
+        this默认指向window。
+         * 参数1是回调函数，是必选项。参数2是可选项。
+         * fn是参数函数，函数被window隐式调用，因此fn的函数体中的this默认指向window。thisObj可以
+         * 将this指向改为此参数对象。如果fn是箭头函数，那么fn中的this始终指向window。
+        fn如果写普通函数，参数thisObj就能改变this指向。如果fn是箭头函数，那么fn中的this始终指向
+         *
+         * */
+        arrTest.forEach(function (item, index, array) {
+            console.log("####",this)  //window  objTest
+            console.log(item, index, array)
+        }, objTest)
+
+        // 重写array.forEach()
+        Array.prototype.myForEach = function (cb) {
+            //myForEach()的this指向方法的调用者，即数组。因此，_arr就是调用数组。
+            let _arr = this;
+            let _len = _arr.length;
+            // 如果传了第二个参数的话，this指向参数。如果没有传第二个参数，this指向window。
+            let _arg2 = arguments[1] || window;
+
+            // 循环的目的就是遍历_arr，每次遍历一个_arr中的元素，就要执行一次cb
+            for (let i = 0; i < _len; i++) {
+                // 更改cb的this指向
+                cb.apply(_arg2, [_arr[i], i, _arr])
+            }
+        }
+
+
+        arrTest.myForEach(function (item, index, array) {
+            console.log("myForEach", this)  //window
+            console.log("myForEach", item, index, array)
+        })
+
+
+        /**array.map(fn, thisObj)
+         * fn是回调函数，函数的参数item：数组的每个元素，index：元素的下标，array：数组本身。
+         * array.map()和array.forEach()的参数完全相同，只是功能有所区别。map()和forEach()都是
+        遍历每个数组元素执行fn回调函数体。只不过，map()返回一个新数组，新数组中的元素是fn执行后的元素。
+        forEach()不返回新数组，原数组中的元素是fn执行后的元素。因此，map()可以当作forEach()来使用，
+        即fn不设置return。
+         * map是映射的意思，forEach是循环每一个的意思。
+         * */
+
+        function deepClone(origin, target) {
+            let tar = target || {};
+            let toStr = Object.prototype.toString;
+            let arrType = '[object Array]';
+
+            for (let key in origin) {
+                if (origin.hasOwnProperty(key)) {
+                    if (typeof origin[key] === 'object' && origin[key] !== null) {
+                        tar[key] = toStr.call(origin[key]) === arrType ? [] : {};
+                        deepClone(origin[key], tar[key])
+                    } else {
+                        tar[key] = origin[key]
+                    }
+                }
+            }
+            return tar
+        }
+
+        let newArr = arrTest.map(function (item, index, array) {
+            item.name = objTest.name;
+            item.age += 100;
+            return item;
+        }, objTest)
+
+        console.log(newArr)
+
+        Array.prototype.myMap = function (cb) {
+            let _arr = this;
+            let _len = _arr.length;
+            let _arg2 = arguments[1] || window;
+            // map()会返回一个数组，因此声明一个数组
+            let _newArr = [];
+            let _item;
+            let _res
+
+            for (let i = 0; i < _len; i++) {
+                // 把cb执行返回的结果放到_newArr中。因为返回的数组元素可能是多层对象，因此需要深拷贝
+                _item = deepClone(_arr[i])
+                _res = cb.apply(_arg2, [_item, i, _arr])
+                // 如果cb有返回值，才将值push到数组中。没有值就不push，输出的数组元素就是undefined
+                _res && _newArr.push(_res)
+            }
+            return _newArr
+        }
+
+        console.log("arrTest", arrTest)
+        let newArr2 = arrTest.myMap(function (item, index, array) {
+            // console.log(this)
+            item.age += 100;
+            return item;
+        }, objTest)
+
+        console.log(newArr2)
+
+
+        /**
+         * array.filter(fn, thisObj)：方法创建一个新的数组，新数组中的元素是指定数组中符合条件的所有元素。
+使用场景：通常用于过滤数组中的某些元素，例如删除操作。 return后面是判断条件。如果return true返回
+所有的数组元素到新数组中， return false 返回空数组。
+         * */
+
+        let newArrFilter = arrTest.filter(function (item, index, array) {
+            console.log("filter", this)
+            return item.age > 25
+        }, objTest)
+
+        console.log("newArrFilter", newArr)
+
+        Array.prototype.myFilter = function (cb) {
+            let _arr = this;
+            let _len = _arr.length;
+            let _arg2 = arguments[1] || window;
+            let _newArr = [];
+            let _item;
+
+            for (let i = 0; i < _len; i++) {
+                _item = deepClone(_arr[i]);
+                cb.apply(_arg2, [_item, i, _arr]) ? _newArr.push(_item) : '';
+            }
+
+            return _newArr
+        }
+
+
+        /**array.every(fn, thisObj)：判断所有数组元素是否都满足判断条件。如果都满足则every()返回值是true，
+如果有一个不满足，则every()返回值是false。return 后面是判断条件。
+         * 
+         * */
+
+        let resEvery = arrTest.every(function (item, index, array) {
+            return item.age < 136
+        }, objTest)
+
+        console.log("resEvery", resEvery)
+
+
+        Array.prototype.myEvery = function (cb) {
+            let _arr = this;
+            let _len = _arr.length;
+            let _arg2 = arguments[1] || window;
+            let _res = true;
+
+            for (let i = 0; i < _len; i++) {
+                if (!cb.apply(arg2, [_arr[i], i, _arr])) {
+                    _res = false;
+                    break;
+                }
+            }
+
+            return _res
+        }
+
+        /**array.some(fn, thisObj)：判断数组元素是否满足条件。只要数组元素有一个满足条件，则返回的结果是true。
+如果都不满足条件，some()返回的结果才是false。 return后面是判断数组元素的条件。
+         * 
+         * */ 
+
+         let resFilter = arrTest.some (function (item, index, array) {
+             console.log(this);
+             return item.age <= 21;
+         }, objTest);
+
+         console.log("res",resFilter)
+
+
+        Array.prototype.mySome = function (cb) {
+            let _arr = this;
+            let _len = _arr.length;
+            let _arg2 = arguments[1] || window;
+            let _res = true;
+
+            for (let i = 0; i < _len; i++) {
+                if (cb.apply(arg2, [_arr[i], i, _arr])) {
+                    _res = true;
+                    break;
+                }
+            }
+
+            return _res
+        }
+
+
+        /**array.reduce(fn, initialValue)：
+         * fn中的参数多了prev，prev和initialValue具有相同的引用指针。initialValue相当于是初始容器，
+每个数组元素都要执行fn，执行的时候向prev数组添加/修改元素，最终reduce()返回prev。reduce()的意思是归纳。
+         * array.reduceRight()就会从遍历数组的方向是从右到左，功能完全相同。
+         * */ 
+
+         let initialValue = [];
+         let newArrReduce = arrTest.reduce(function (prev, item, index, array) {
+             console.log(prev === initialValue);
+             item.age >= 125 && prev.push(item);
+             return prev;
+         }, initialValue)
+
+         console.log("newArrReduce",newArrReduce)
+
+
+         Array.prototype.myReduce = function (cb, initialValue) {
+             let _arr = this,
+                 _len = _arr.length,
+                _arg3 = arguments[2] || window,
+                _item;
+
+                for (let i = 0; i < _len; i ++) {
+                    _item = deepClone(_arr[i]);
+                    initialValue = cb.apply(_arg3, [initialValue, _item, i, _arr])
+                } 
+
+                return initialValue;
+         }
+
+         let initialValue2 = [];
+         let newArrReduce2 = arrTest.reduceRight(function (prev, item, index, array) {
+             console.log(prev === initialValue2);
+             item.age >= 125 && prev.push(item);
+             return prev;
+         }, initialValue2)
+
+         console.log("newArrReduce2",newArrReduce2)
+
+         Array.prototype.myReduceRight = function (cb, initialValue) {
+             let _arr = this,
+                 _len = _arr.length,
+                _arg3 = arguments[2] || window,
+                _item;
+
+                for (let i = _len; i >= 0; i --) {
+                    _item = deepClone(_arr[i]);
+                    initialValue = cb.apply(_arg3, [initialValue, _item, i, _arr])
+                } 
+
+                return initialValue;
+         }
     </script>
 </body>
 

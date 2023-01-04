@@ -447,63 +447,326 @@ GO存储着所有的全局变量和全局函数声明。
         //<button onclick="console.log(this)">test</button>  this指向button节点
 
         // 儿子也必须吃父亲的水果
-        class Father {
-            constructor() {
-                // 让this永远指向Father实例对象。
-                this.eat = this.eat.bind(this)
+        // class Father {
+        //     constructor() {
+        //         // 让this永远指向Father实例对象。
+        //         this.eat = this.eat.bind(this)
+        //     }
+
+        //     get fruit() {
+        //         return 'apple'
+        //     }
+
+        //     eat() {
+        //         console.log('I am eating a ' + this.fruit)
+        //     }
+        // }
+
+        // class Son {
+        //     get friut() {
+        //         return 'pear'
+        //     }
+        // }
+
+        // const father = new Father()
+        // const sons = new Son()
+        // father.eat()
+        // son.eat = father.eat;
+        // son.eat()
+
+
+        // 
+       
+        /**5.1、call()
+         * this的作用就是指明我要调用哪个作用域中的属性和方法。对于方法来说，方法调用者是谁，方法中的
+this默认就指向谁。也就是说，方法使用的是调用者的作用域中的属性和方法。
+         * testCall.call()：call()执行相当于执行testCall()，只是this指向有区别。testCall()的
+调用者是window，因此函数中的this指向window。testCall.call()执行，this指向call()的调用者testCall()
+call()可以将testCall()中的this改为call()的第一个参数。因此call()的第一个参数必须是{}/[]/function
+等引用值，不然没有意义。
+         * call()的第二个参数开始，是testCall()函数的实参列表。
+         * */ 
+        function testCall () {
+            console.log("***%%%",this, arguments)  //this指向{}
+            return true
+        } 
+
+        testCall()
+
+        testCall.call({
+            a: 1,
+            b: 2
+        },"张三", "李四")
+
+        // ES6模块中自动使用严格模式，即this就是undefined。非严格模式中this指向window
+        testCall()
+
+        Function.prototype.myCall = function (ctx) {
+            // ctx是context的意思，即上下文。参数ctx表示对象，ctx => {a: 1, b: 2}
+            // 必须保证ctx是引用值，因此通过Object()来转化。如果ctx不存在，则默认为window。
+            // this => testCall()/window => ctx
+            ctx = ctx ? Object(ctx) : window
+            /*myCall()方法的调用者是testCall()，因此myCall()方法中的this指向testCall()
+ctx是对象，给ctx添加函数属性originFn，并将this赋给originFn。因此，ctx.originFn就是原函数testCall()
+可是当执行originFn()的时候，originFn()中的this就指向它的调用者ctx。originFn()和testCall()都是引用值
+执行originFn()就相当于执行testCall()。但此时执行originFn()，myCall()的this指向的就是ctx而非testCall()
+            */ 
+            ctx.originFn = this;
+            let args = []
+
+            // 第二步：获取myCall()的第二个到最后的参数，并作为testCall()的实参。从arguments的第2位开始。
+            for (let i = 1; i < arguments.length; i++ ) {
+                /*现将字符串arguments[i]放入args数组中，作为实参列表放入originFn()的形参列表。
+                即args = [arguments[1]，arguments[2]....]。转化为字符串的目的是便于eval()执行
+                */ 
+                args.push('arguments[' + i + ']')
             }
 
-            get fruit() {
-                return 'apple'
-            }
+            /**' + args + '相当于args.toString()，即将数组args转换为字符串，结果为
+arguments[1], arguments[2], ...。即去掉外面的[]，只留下字符串元素。
+             * ctx.originFn(' + args + )相当于是ctx.originFn(arguments[1], arguments[2])
+这样就将args数组中的元素作为originFn()的实数
+             * eval()可以执行字符串的程序。所以不仅参数是字符串，ctx.origin()也要变成字符串。
+             * eval()执行完后相当于ctx.originFn()执行完，也就是相当于testCall()执行完。
+如果testCall()中有返回值，则用变量接收eval()的执行结果
+             * 如果push()不用字符串，ctx.orginFn()不用字符串，相当于是
+ctx.originFn([arguments[1], arguments[2]])，这肯定是执行不了的。如果push()用字符串，
+ctx.orginFn()不用字符串，相当于是ctx.originFn(['arguments[1]', 'arguments[2]'])。
+如果push()不用字符串，ctx.orginFn()用字符串，相当于是
+'ctx.originFn([arguments[1], arguments[2]])'。
+             * 
+             * */ 
+            let ret = eval('ctx.originFn(' + args + ')')
+            // 最后删除ctx.originFn
+            delete ctx.originFn
 
-            eat() {
-                console.log('I am eating a ' + this.fruit)
-            }
+            // 将eval()的结果返回出去，相当于是把testCall()的结果返回出去。
+            return ret
         }
 
-        class Son {
-            get friut() {
-                return 'pear'
-            }
+        testCall.myCall({
+            a: 1,
+            b: 2
+        },"张三", "李四")
+
+        /**5.2、apply()
+         * 1、函数.apply()执行，apply()执行，相当于是函数执行，只是this指向发生了改变。
+         * 2、apply()第一个参数是引用值，作用和call()第一个参数相同。apply()的第二个参数是数组，
+也就是函数的实参数组。如果参数2是对象、function、undefined、null，不会报错但arguments.length等于0。
+如果参数2是原始值，则报错。apply()只取到第二个参数，忽略第三个及其以后的参数。
+         * */ 
+
+        function testApply () {
+            console.log("&&&",this, arguments)
         }
 
-        const father = new Father()
-        const sons = new Son()
-        father.eat()
-        son.eat = father.eat;
-        son.eat()
+        testApply.apply({
+            a: 1,
+            b: 2 
+        }, [3, 4, 5])
 
+        function myTypeOf (value) {
 
-        // 5.1、call、apply、bind
-        /*
-            xxx.call(target,params)：将xxx的this只想
-            Friuts.call(newFriut, params)：将this的指向改为newFriut，params是Fruits执行所需的参数。
-            apply(newFruit，[parmas])：apply的逻辑和call相同，只是参数用数组装载。
-        */
-        function Friuts(name, color) {
-            this.brand = name;
-            this.color = color;
-            this.run = function () {
-                console.log(`running`)
+            if (value = null) {
+                return 'null'
             }
-        }
 
-        let newFriut = {
-            displacement: '3.0'
+            return typeof(value) === 'object' 
+            ? 
+            {
+                '[object Object]': 'object',
+                '[object Array]': 'array',
+                '[object Number]': 'obj_number',
+                '[object String]': 'obj_string',
+                '[object Boolean]': 'obj_boolean',
+            }[({}).toString.call(value)]
+            :
+            typeof(value)
         };
 
-        /*
-           构造函数直接执行相当于是普通函数执行，因此this指向window。可是call将this的指向改为newFriut对象，
-           因此执行构造函数的时候，相当于是给newFriut对象添加属性。最后函数返回newFruit对象。
-           */
-        console.log(Friuts('orange', 'yellow')) //undefined，构造函数没有显示的返回值
-        Friuts.call(newFriut, 'apple', 'red');
-        Friuts.apply(newFriut, ['apple', 'red'])
-        console.log(newFriut)
+        Function.prototype.myApply = function (ctx, args) {
+            ctx = ctx ? Object(ctx) : window;
+            ctx.originFn = this;
 
-        let friut = new Friuts('orange', 'red')
-        console.log(friut)
+            // args非对象类型，非function类型，即为原始值、undefined。
+            if (typeof args !== 'object' && typeof args !== 'function') {
+                throw new TypeError ('CreateListFromArrayLike called of ...')
+            }
+
+            //如果args不存在或者args类型不是数组，则apply()只转变this指向，然后运行原函数。
+            if (!args || myTypeOf(args) !== 'Array') {
+                return ctx.originFn()
+            }
+
+            // args存在且为数组，则apply()转变this指向并将args作为原函数的实参执行。
+            let ret = eval('ctx.originFn(' + args + ')');
+            delete ctx.originFn;
+            return ret;
+        }
+
+        testApply.myApply({
+            a: 1,
+            b: 2 
+        }, [3, 4, 5])
+
+
+        /**5.3、bind()
+         * fun.bind()，bind()执行后，fun并不会执行，而是返回一个新的函数。
+         * fun.bind()第一个参数是改变fun的this指向。第二个及其以后的参数都是fun的实参，它的格式
+和call()相同。bind()可以分离fun的参数，bind()接收一部分参数，返回的新函数接收另一部分参数。
+         *new fun.bind()返回的新函数，新函数中的this指向fun，实例对象也继承了fun的原型属性和方法。 
+         * */ 
+
+        function testBind (user, car) {
+            console.log(`${user} 刚买了一辆 ${car} 车`);
+            console.log("^^^",this, arguments);
+        }
+
+        testBind.prototype.myLove = '李四'
+
+        const tBind = testBind.bind({
+            a: 1,
+            b: 2
+        }, "张三")
+
+        tBind("劳斯莱斯")
+
+        const newTBind = new tBind("劳斯莱斯");
+        console.log(newTBind)  //newTBind是testBind()构造的实例对象，而不是tBind()构造的实例对象
+    
+        Function.prototype.myBind = function (ctx) {
+            // this -> 调用函数 -> ctx
+            // 保存原函数
+            let originFn = this;
+            /*获取arguments中从第二个到以后的元素，它就是函数的部分实参。返回的新函数中还有另一部分的参数。
+            slice()的this原本只想Array，可我需要浅拷贝arguments，因此使用call()改变this指向。
+            */ 
+            let args = Array.prototype.slice.call(arguments, 1);
+            // 圣杯模式的原型传递中介函数
+            let _tempFn = function () {}
+
+            // myBind()返回的是函数
+            let newFn =  function () {
+                // 获取返回的新函数中的参数列表
+                let newArgs = [].slice.call(arguments)
+                /**通过apply()改变this指向，然后再执行原函数。从而实现this指向的改变。
+                 * args.concat(newArgs)合并args和newArgs参数数组
+                 * 判断this是否由newFn()构造出来的，如果是则使用this
+                 * 如果new 了返回的新函数，那么this就是由返回的新函数构造出来的实例对象，相当于是实例化了
+                 * 如果没有new，那么this还是指向myBind()传递过来的ctx，即object 
+                 * */ 
+                return originFn.apply(this instanceof newFn ? this : ctx, args.concat(newArgs))
+            }
+
+            // 将函数的原型和返回的新函数的原型指向相同的引用。
+            // newFn.prototype = this.prototype
+            _tempFn.prototype = this.prototype;
+            newFn.prototype = new _tempFn();
+            return newFn;
+        }
+
+
+        const tMyBind = testBind.myBind({
+            a: 1,
+            b: 2
+        }, "张三")
+
+        tMyBind("劳斯莱斯")
+        const newTMyBind = new tMyBind("劳斯莱斯");
+        console.log(newTMyBind)
+
+
+
+        /**
+         * 1、创建构造函数。2、实例化构造函数。3、接收构造函数中的返回值。
+         *new : 1、this -> {} 
+2、this.a, this.b -> {
+                        a: va, 
+                        b: vb, 
+                        __proto__:Function.prototype: {
+                                                        prototypeAtrr: xxx
+                                                        constructor: Function
+                                                        __proto__: xxx
+                                                    }
+                    }
+         *关键字new 没办法直接重写，所以使用myNew()来实现重写。
+         */
+        function TestNew (a, b) {
+            this.a = a;
+            this.b = b;
+        } 
+
+        TestNew.prototype.add = function () {
+            return this.a + this.b;
+        };
+
+        const testNew = new TestNew(1, 2);
+
+        console.log(testNew)
+
+        function myNew () {
+            //aray.shift(arr)，默认截取数组的第一个元素。arguments[0]就是构造函数
+            let constructor = [].shift.call(arguments),
+            //new会创建实例对象，因此声明{}作为实例对象。
+                _this = {};
+
+            // new中，实例对象原型继承构造函数的prototype。
+            _this.__proto__  = constructor.prototype
+            /**new中，会将构造函数的this指向改为实例对象。arguments已经删除了第一项，剩下的都是参数
+             * constructor执行就会给_this实例对象当中添加属性。如果执行完之后，有返回值，且这个返回值
+             * 是引用值，则new 返回的结果是这个引用值。如果返回的结果是原始值，则new 返回的结果是
+             * 实例对象
+             * */ 
+            let res = constructor.apply(_this, arguments)
+
+            return typeof(res) === 'object' ? res : _this
+        }
+
+        const testMyNew = myNew(TestNew, 1, 2)
+
+        console.log("testMyNew",testMyNew)
+
+
+        /**typeof和Object.prototype.toString.call()不能够检测到实例对象是否由该构造函数/类构造
+         * instanceof可以校验出实例对象是否由该构造函数/类构造出来。
+         * instanceof 只要校验的构造函数/类出现在实例对象的原型链中，返回值就是true.
+         * */ 
+
+         class TestInstanceOf {}
+
+         let testInstanceOf = new TestInstanceOf()
+         console.log(testInstanceOf instanceof TestInstanceOf) //true
+
+        //  特例 arr object
+        let arrInstance = [1,2,3,4]
+        console.log(arrInstance instanceof Array) //true
+        console.log(arrInstance instanceof Object) //true
+        console.log(arrInstance.__proto__ === Array.prototype) //true 
+        console.log(arrInstance.__proto__ === Object.prototype) //false
+        console.log(arrInstance.__proto__.__proto__ === Object.prototype)  //true
+        console.log(Object.prototype.__proto__) //null
+
+        // target是实例对象，Type是构造函数/类
+        function myInstanceOf (target, type) {
+                type = type.prototype;
+                target = target.__proto__;
+
+                // 一直循环，直至找完原型链
+                while (true) {
+                    if (target === null) {
+                        return false;
+                    }
+
+                    if (target === type) {
+                        return true
+                    }
+
+                    //依次循环target实例对象的原型链，直至找到或者到原型链的顶部 
+                    target = target.__proto__;
+                }
+        }
+
+        console.log(myInstanceOf(testInstanceOf, TestInstanceOf)) //true
     </script>
 </body>
 

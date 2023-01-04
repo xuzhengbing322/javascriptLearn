@@ -13,8 +13,8 @@
         //4、创建对象的方法
         /*1、对象
             对象的创建方法：1、使用字面量{}创建：let obj1 = {}。2、实例化构造函数创建：new Object()
-实际上，let obj1 = {} => let obj1 = new Object()。new的作用：1、根据构造函数生成实例对象。
-2、根据构造函数的原型生成实例对象的原型。
+实际上，let obj1 = {} => let obj1 = new Object()。
+            new的作用：1、根据构造函数生成实例对象。2、根据构造函数的原型生成实例对象的原型。
             对象的constructor指向构造它的构造函数。那么，{}的constructor指向Object()
             对象中有属性和方法。对象是引用值，操作对象的属性和方法，流程是先通过变量找到存储对象在堆内存
 地址的指针，然后根据指针找到对象的具体值再进行操作。obj1 = obj2，表示两个变量存储着相同的指针，指向同一个
@@ -55,12 +55,23 @@
         myLang.myStudyingLang(1)
 
 
-        /*2、对象的方法
-        2.1、Object.create({one},{two})：创建一个对象，对象的prototype为参数1，参数2是对象
-自己的属性。参数2是对象，而且它的属性是描述器descriptor，即属性也是对象。
-        descriptor的属性：1、value：值。2、configurable是否可配置（删除等操作）。
-3、writable是否可修改。4、 enumerable是否可枚举（枚举的意思是是否可循环遍历）。5、 get/set存取描述符
+        /**2、对象的方法
+         * 2.1、Object.create(prototype,attribute)
+         * 2.2、Object.assign(target, ...sources) 
+         * 2.3、Object.defineProperty(target, attribute, descriptors)
+         * Object.defineProperties(target, attributes)
+         * 2.4、Object.entries()  Object.fromEntries()
+         * 2.5、Object.freeze(object)  Object.seal()  Object.preventExtensions()
+         * 2.6、Object.isFrozen(obj)  Object.isSealed(object)  Object.isExtensible(object)
+         * 2.7、Object.keys(object)   Object.getOwnPropertyNames(object) 
+         * */ 
 
+        /*
+        2.1、Object.create(prototype,attribute)：创建一个对象，参数1是对象的原型，参数2是对象自己
+的属性。参数1，2都是对象，参数2的属性是描述器descriptor，即也是对象。
+        descriptor的属性：1、value：值。2、configurable是否可配置（删除操作）。
+3、writable是否可写(修改操作)。4、 enumerable是否可枚举（枚举的意思是是否可循环遍历）。
+5、 get/set存取描述符
         */
         let createObj = Object.create({ a: 1 },
             {
@@ -77,20 +88,16 @@
             })
         console.log("createObj", createObj)
 
-        // Object.assign()只分配可枚举的对象，而且不会管可枚举对象的原型。
-        const newCreateObj = Object.assign({}, createObj)
-        console.log("newCreateObj", newCreateObj) //{b: 5}
-
         // 使用null作为参数，实例对象没有原型。这就证明不是所有的对象都继承于Object.prototype
-        let obj = Object.create(null)
-        console.log("obj", obj)
+        let objNull = Object.create(null)
+        console.log("objNull", objNull)
 
 
         /*2.2、Object.assign(target, ...sources) 
-        target：目标对象，source：资源对象，可以是多个。对象有枚举的特性。
-        Object.assign()：将一个或多个可枚举的source的自身的属性分配给target，不可枚举的source不
-能将属性分配给target，可枚举的source的prototype中的属性也不会分配给target。方法最终返回值是target。
-因此，target和接收方法返回值的变量的引用相同，是同意对象。
+        target：目标对象，source：资源对象，可以是多个。
+        Object.assign()：将一个或多个source对象中可枚举的自身的属性分配给target，不可枚举的属性和
+source原型中的属性都不会分配给target。方法的返回值就是target，因此，target和接收方法返回值的变量的引用
+相同，是同一对象。
         分配方法：调用source中的getter，再调用target中的setter。即getter去get source对象中的属性，
 然后通过target中的setter去set进target中。
     
@@ -99,6 +106,8 @@
             return target
         }
         */
+
+        // 案例一：
         const test1 = {
             a: 1,
             b: 2
@@ -134,7 +143,7 @@
         test4.d = 100;
         console.log("test1:", test1, "test4:", test4)
 
-        /*实例：v1,v2,v3,v4都不是对象，就需要转成对象。通过包装类转化后， r1,r3,r4都不可以枚举，
+        /*案例二：v1,v2,v3,v4都不是对象，就需要转成对象。通过包装类转化后， r1,r3,r4都不可以枚举，
 只有r2可以枚举。源对象中可枚举的属性才能分配到目标对象中        
         */
         const v1 = 123;
@@ -153,6 +162,10 @@
         for (let k in r2) {
             console.log(k, r2[k])
         }
+
+        // 案例三：Object.assign()只分配可枚举的对象，而且不会管可枚举对象的原型。
+        const newCreateObj = Object.assign({}, createObj)
+        console.log("newCreateObj", newCreateObj) //{b: 5}
 
 
         // 重写Object.assign()
@@ -224,6 +237,7 @@
         Object.fromEntries(obj)：将由键值对项组成的数组/map类型的数据转变成对象，并返回一个新对象。
         */
 
+        // 案例一：
         function Test() {
             this.a = 1;
             this.b = 2;
@@ -241,7 +255,7 @@
             console.log(k, v)
         }
 
-        // objz中的a属性不可枚举，因此它不会将对象变成键值对项的数组。
+        // 案例二：objz中的a属性不可枚举，因此它不会将对象变成键值对项的数组。
         console.log("objz", objz)
 
         const testArrTwo = Object.entries(objz);
@@ -254,7 +268,6 @@
 
         /* Map(obj)：Map()根据obj对象中可枚举的属性实例化出实例对象。实例对象通过set()方法给实例对象
 添加属性，实例对象为map类型的数据。
-        
         */
         const m = new Map();
         m.set('a', 1);
@@ -353,7 +366,7 @@ Object.freeze()是浅冻结，它只能冻结对象的第一层属性，无法�
         Tect.prototype = {
             f: 6
         }
-        console.log("tect", tect)
+        console.log("tect", tect)  //不可更改原型对象
 
         const isFrozenRes = Object.isFrozen(tect)
         console.log(isFrozenRes) //true
@@ -400,7 +413,6 @@ Object.freeze()是浅冻结，它只能冻结对象的第一层属性，无法�
         /*2.6、Object.keys(object)   Object.getOwnPropertyNames(object)  获取对象的键名
         Object.keys(object)：只能获取对象中可枚举的对象属性，返回数组。
         Object.getOwnPropertyNames(object)：可以获取对象的所有属性，包括不可枚举属性，返回数组。
-            
         */ 
 
 
@@ -478,7 +490,7 @@ Object.freeze()是浅冻结，它只能冻结对象的第一层属性，无法�
 严格模式中扩展对象会报错。
         Object.isExtensible(object)：判断object是否可扩展。
         不可扩展的空对象就是冻结对象/密封对象。因为空对象没有属性，无法删除和修改。不可扩展的非空对象
-就不是冻结对象/密封对象。
+就不是冻结对象/密封对象。注意冻结对象一定是密封对象
         */
 
         const objPExten = {}
@@ -489,6 +501,23 @@ Object.freeze()是浅冻结，它只能冻结对象的第一层属性，无法�
         console.log(Object.isFrozen(objPExten)) //true 
         console.log(Object.isSealed(objPExten)) //true  
 
+        const objr = {
+            get a () {
+                return 1;
+            }
+        }
+
+        // 只有访问器的情况下是不可写，可删除。
+        objr.a = 2;  //不可写
+        delete objr.a //可删除
+        console.log(objr)
+
+        Object.preventExtensions(objr)
+        console.log(Object.isFrozen(objr)) //true
+        console.log(Object.isSealed(objr)) //true
+        console.log(Object.isExtensible(objr)) //false
+
+        // 深扩展的写法和深冻结、深密封相同
     </script>
 </body>
 
